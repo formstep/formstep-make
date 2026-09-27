@@ -4,7 +4,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "node --test test/validate.test.mjs"
+        "test": "node --test test/*.test.mjs",
+        "sync:hub": "node scripts/sync-hub.mjs"
     },
     "engines": {
         "node": ">=20"

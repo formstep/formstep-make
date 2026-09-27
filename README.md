@@ -8,15 +8,15 @@ Git-tracked mirror of formbase custom app configuration for [Make Developer Hub]
 - Rotating access and refresh tokens (`api:read api:write offline_access`)
 - Workspace-scoped, cursor-paginated form picker
 - Attached dedicated webhook with automatic subscribe/unsubscribe
-- **Watch Public Link Submissions**: one event per trigger for public-link submissions. `submission_created` delivers `submission.completed` once per new submission; `submission_updated` delivers `submission.updated` when the respondent edits a submission they already sent (the form must allow editing after submit); `submission_abandoned` delivers `submission.abandoned`, with a required 12-hour, 1-day, 3-day, or 1-week idle window. Since 2.4.0 a scenario on `Submission created` no longer runs on edits; pick `Submission updated` for those. A completed request never reaches it (one channel, one event), and a request never produces an update event
-- **Watch Requests**: `request_completed`, `request_expired` and `request_canceled` events on a form's requests, through the same attach/detach lifecycle (`webhooks.create` / `webhooks.delete`). Test requests never reach it. A completed request fires Watch Requests alone, never Watch Public Link Submissions, so a scenario with both triggers on one form receives one bundle per completion
-- **Create a Request** (`requests.create`): form picker, recipient, delivery, language, reminders, expiry, external ID, metadata and test mode. Prefill inputs, hidden-field context inputs and the read-only picker are generated per field key from `fields.list` through the `getRequestFields` nested RPC. The external ID doubles as `idempotencyKey`, so a re-run scenario reuses the request. Output is the request summary with the request link (`url`)
-- **Get a Request** (`requests.get`): the request view with `answers` and `display` listed per field key from `fields.list`, plus the timeline
-- **Cancel a Request** (`requests.cancel`, optional reason) and **Remind a Request** (`requests.remind`)
-- **Search Requests** (`requests.list`) by form, status and external ID, following `nextCursor`
+- **Watch public link submissions**: one event per trigger for public-link submissions. `submission_created` delivers `submission.completed` once per new submission; `submission_updated` delivers `submission.updated` when the respondent edits a submission they already sent (the form must allow editing after submit); `submission_abandoned` delivers `submission.abandoned`, with a required 12-hour, 1-day, 3-day, or 1-week idle window. Since 2.4.0 a scenario on `Submission created` no longer runs on edits; pick `Submission updated` for those. A completed request never reaches it (one channel, one event), and a request never produces an update event
+- **Watch requests**: `request_completed`, `request_expired` and `request_canceled` events on a form's requests, through the same attach/detach lifecycle (`webhooks.create` / `webhooks.delete`). Test requests never reach it. A completed request fires Watch requests alone, never Watch public link submissions, so a scenario with both triggers on one form receives one bundle per completion
+- **Create a request** (`requests.create`): form picker, recipient, delivery, language, reminders, expiry, external ID, metadata and test mode. Prefill inputs, hidden-field context inputs and the read-only picker are generated per field key from `fields.list` through the `getRequestFields` nested RPC. The external ID doubles as `idempotencyKey`, so a re-run scenario reuses the request. Output is the request summary with the request link (`url`)
+- **Get a request** (`requests.get`): the request view with `answers` and `display` listed per field key from `fields.list`, plus the timeline
+- **Cancel a request** (`requests.cancel`, optional reason) and **Remind a request** (`requests.remind`)
+- **Search requests** (`requests.list`) by form, status and external ID, following `nextCursor`
 - Dynamic sample payloads from `submissions.sample` and `requests.sample`
-- Dynamic output interfaces from `fields.list`, so every answer is mappable under its own field key: a choice answer as its option key, a multi-choice answer as a list of keys, a matrix as one item per row, a repeating group as an array of rows, a booking or a payment as one item per property. Watch Requests and Get a Request reuse the `buildSubmissionInterface` function through the `iml` namespace, so a field key maps under the same pill in every module
-- Universal **Make an API Call** module for other formbase JSON-RPC methods
+- Dynamic output interfaces from `fields.list`, so every answer is mappable under its own field key: a choice answer as its option key, a multi-choice answer as a list of keys, a matrix as one item per row, a repeating group as an array of rows, a booking or a payment as one item per property. Watch requests and Get a request reuse the `buildSubmissionInterface` function through the `iml` namespace, so a field key maps under the same pill in every module
+- Universal **Make an API call** module for other formbase JSON-RPC methods
 - Unsigned webhooks, by necessity, for submissions and requests alike: a Make custom-app webhook sees only the parsed `body`, `headers` and `query`, never the raw bytes, and holds no per-subscription secret at receive time, so `X-formbase-Signature` cannot be verified here. Deliveries are protected by the unguessable `hook.make.com` URL over HTTPS; Zapier and n8n verify signatures because their runtimes expose the raw body
 - Every event is the formbase envelope `{ id, type, createdAt, apiVersion, test, data }`: `data.answers` holds each answer once under its field key, `data.display` the readable text under the same key, `data.submission` the email/date/PDF/language, and on request events `data.request` the request block
 - Event `type` values: `submission.completed`, `submission.updated`, `submission.abandoned`, `request.completed`, `request.expired` and `request.canceled`
@@ -41,12 +41,13 @@ formbase-make/
 ├── webhooks/submission_webhook/ # Attached dedicated webhook for submissions
 ├── webhooks/request_webhook/    # Attached dedicated webhook for requests
 ├── rpcs/list_forms/             # Paginated form options
-├── rpcs/get_sample_submission/  # Dynamic Watch Public Link Submissions sample
-├── rpcs/get_submission_interface/ # Dynamic Watch Public Link Submissions interface
-├── rpcs/get_sample_request/     # Dynamic Watch Requests sample (requests.sample)
-├── rpcs/get_request_event_interface/ # Dynamic Watch Requests interface
-├── rpcs/get_request_interface/  # Dynamic Get a Request interface
-├── rpcs/get_request_fields/     # Nested RPC: Create a Request prefill, context and read-only inputs
+├── rpcs/get_sample_submission/  # Dynamic Watch public link submissions sample
+├── rpcs/get_submission_interface/ # Dynamic Watch public link submissions interface
+├── rpcs/get_sample_request/     # Dynamic Watch requests sample (requests.sample)
+├── rpcs/get_request_event_interface/ # Dynamic Watch requests interface
+├── rpcs/get_request_interface/  # Dynamic Get a request interface
+├── rpcs/get_request_fields/     # Nested RPC: Create a request prefill, context and read-only inputs
+├── scripts/sync-hub.mjs         # Pushes the repository to Make Developer Hub (npm run sync:hub)
 └── test/                        # Semantic contract tests
 ```
 
@@ -94,6 +95,18 @@ Re-running updates redirect URIs and secret hash, returning `created: false`. Ke
 
 ## 2. Create components in Make Developer Hub
 
+### Sync with the API
+
+`npm run sync:hub` pushes this repository to the Hub app `formbase-f1d7bp` version 1 through Make's SDK Apps API, using the mapping in the table below.
+
+1. In Make, open your profile → **API access** → **Add token**, with scopes `sdk-apps:read` and `sdk-apps:write`. Save it as `MAKE_API_TOKEN=...` in `~/.config/formbase-make/.env`, or export it. To push connection Common data as well, add `MAKE_OAUTH_CLIENT_SECRET=...` there (the value set in Convex). Without it, Common data is not touched. The script never prints either value.
+2. Run `npm run sync:hub` first. It is a dry run: it reads every component and section from the Hub and prints the components it would create, the sections that differ (JSON compared without regard to whitespace), and the Hub components the repository does not have. Those are reported and never deleted.
+3. Run `npm run sync:hub -- --apply` to create the missing components, update changed labels and descriptions, and push the differing sections, in the order below.
+
+`--static` (the default while formbase#207 is open) pushes the `*.static.imljson` twins and skips the IML functions and the RPCs that call them, as described below. `--dynamic` pushes functions and the dynamic files. Make names connections and webhooks itself, so the script matches them by label. If a label does not match, pin one with `--map submission_webhook=<hub name>`. The script never publishes, requests review, changes visibility or deletes anything. `app/metadata.imljson` and `app/parameters.imljson` are not synced, because the API has no app parameters section.
+
+### Manual reference
+
 Create private app named `formbase`, then create components in this order:
 
 1. OAuth 2.0 connection `formbase`
@@ -140,27 +153,27 @@ Paste each file into corresponding Hub editor:
 | `webhooks/request_webhook/attach.imljson` | Request webhook → Attach |
 | `webhooks/request_webhook/detach.imljson` | Request webhook → Detach |
 | `webhooks/request_webhook/api.imljson` | Request webhook → Communication |
-| `modules/watch_public_link_submissions/parameters.imljson` | Watch Public Link Submissions → Static parameters |
-| `modules/watch_public_link_submissions/api.imljson` | Watch Public Link Submissions → Communication |
-| `modules/watch_public_link_submissions/interface.imljson` | Watch Public Link Submissions → Interface (`interface.static.imljson` until IML functions are enabled) |
-| `modules/watch_public_link_submissions/samples.imljson` | Watch Public Link Submissions → Samples |
-| `modules/watch_requests/parameters.imljson` | Watch Requests → Static parameters |
-| `modules/watch_requests/api.imljson` | Watch Requests → Communication |
-| `modules/watch_requests/interface.imljson` | Watch Requests → Interface (`interface.static.imljson` until IML functions are enabled) |
-| `modules/watch_requests/samples.imljson` | Watch Requests → Samples |
-| `modules/create_request/parameters.imljson` | Create a Request → Static parameters |
-| `modules/create_request/expect.imljson` | Create a Request → Mappable parameters (`expect.static.imljson` until IML functions are enabled) |
-| `modules/create_request/api.imljson` | Create a Request → Communication |
-| `modules/create_request/interface.imljson` | Create a Request → Interface |
-| `modules/create_request/samples.imljson` | Create a Request → Samples |
-| `modules/get_request/parameters.imljson` | Get a Request → Static parameters |
-| `modules/get_request/expect.imljson` | Get a Request → Mappable parameters |
-| `modules/get_request/api.imljson` | Get a Request → Communication |
-| `modules/get_request/interface.imljson` | Get a Request → Interface (`interface.static.imljson` until IML functions are enabled) |
-| `modules/get_request/samples.imljson` | Get a Request → Samples |
-| `modules/cancel_request/*.imljson` | Cancel a Request → the same five fields |
-| `modules/remind_request/*.imljson` | Remind a Request → the same five fields |
-| `modules/search_requests/*.imljson` | Search Requests → the same five fields |
+| `modules/watch_public_link_submissions/parameters.imljson` | Watch public link submissions → Static parameters |
+| `modules/watch_public_link_submissions/api.imljson` | Watch public link submissions → Communication |
+| `modules/watch_public_link_submissions/interface.imljson` | Watch public link submissions → Interface (`interface.static.imljson` until IML functions are enabled) |
+| `modules/watch_public_link_submissions/samples.imljson` | Watch public link submissions → Samples |
+| `modules/watch_requests/parameters.imljson` | Watch requests → Static parameters |
+| `modules/watch_requests/api.imljson` | Watch requests → Communication |
+| `modules/watch_requests/interface.imljson` | Watch requests → Interface (`interface.static.imljson` until IML functions are enabled) |
+| `modules/watch_requests/samples.imljson` | Watch requests → Samples |
+| `modules/create_request/parameters.imljson` | Create a request → Static parameters |
+| `modules/create_request/expect.imljson` | Create a request → Mappable parameters (`expect.static.imljson` until IML functions are enabled) |
+| `modules/create_request/api.imljson` | Create a request → Communication |
+| `modules/create_request/interface.imljson` | Create a request → Interface |
+| `modules/create_request/samples.imljson` | Create a request → Samples |
+| `modules/get_request/parameters.imljson` | Get a request → Static parameters |
+| `modules/get_request/expect.imljson` | Get a request → Mappable parameters |
+| `modules/get_request/api.imljson` | Get a request → Communication |
+| `modules/get_request/interface.imljson` | Get a request → Interface (`interface.static.imljson` until IML functions are enabled) |
+| `modules/get_request/samples.imljson` | Get a request → Samples |
+| `modules/cancel_request/*.imljson` | Cancel a request → the same five fields |
+| `modules/remind_request/*.imljson` | Remind a request → the same five fields |
+| `modules/search_requests/*.imljson` | Search requests → the same five fields |
 | `modules/make_api_call/parameters.imljson` | Universal module → Static parameters |
 | `modules/make_api_call/expect.imljson` | Universal module → Mappable parameters |
 | `modules/make_api_call/api.imljson` | Universal module → Communication |
@@ -169,12 +182,12 @@ Paste each file into corresponding Hub editor:
 
 Custom IML functions are disabled for a new Make app: the Developer Hub has no Functions tab and the `+` menu offers no "Create Function". Make enables them per app through a helpdesk ticket (https://www.make.com/en/ticket; tracked as formbaseso/formbase#207). Until then skip steps 2, 5, 7, 8 and 9 and paste the static twins instead:
 
-- `modules/watch_public_link_submissions/interface.static.imljson` into Watch Public Link Submissions → Interface
-- `modules/watch_requests/interface.static.imljson` into Watch Requests → Interface
-- `modules/get_request/interface.static.imljson` into Get a Request → Interface
-- `modules/create_request/expect.static.imljson` into Create a Request → Mappable parameters
+- `modules/watch_public_link_submissions/interface.static.imljson` into Watch public link submissions → Interface
+- `modules/watch_requests/interface.static.imljson` into Watch requests → Interface
+- `modules/get_request/interface.static.imljson` into Get a request → Interface
+- `modules/create_request/expect.static.imljson` into Create a request → Mappable parameters
 
-Each static twin is what the function returns for an unpublished form, with the per-key parts typed `any`: `data.answers` and `data.display` still arrive and map by typing `{{1.data.answers.<field key>}}`, and Create a Request takes `prefill` and `context` as JSON objects and `readonly` as a list of field keys instead of one input per field. The test suite keeps every static twin equal to its function. Once functions are enabled, add the four functions, create the RPCs, and switch each module back to the dynamic file.
+Each static twin is what the function returns for an unpublished form, with the per-key parts typed `any`: `data.answers` and `data.display` still arrive and map by typing `{{1.data.answers.<field key>}}`, and Create a request takes `prefill` and `context` as JSON objects and `readonly` as a list of field keys instead of one input per field. The test suite keeps every static twin equal to its function. Once functions are enabled, add the four functions, create the RPCs, and switch each module back to the dynamic file.
 
 General settings come from each `metadata.imljson`. Set component connection/webhook links exactly as declared there.
 
@@ -186,21 +199,21 @@ OAuth redirect must remain `oauth.localRedirectUri`. For hosted Make this resolv
 
 Create test scenario in Make:
 
-1. Add **formbase → Watch Public Link Submissions**.
+1. Add **formbase → Watch public link submissions**.
 2. Create connection. Sign in, select workspace, approve consent. Connection label should show workspace name.
-3. Select form and `Submission created`. Use **Make an API Call** with `webhooks.list` to confirm the registered subscription carries no `idleWindow` (the attach body sends it only for abandoned submissions, never for created or updated).
+3. Select form and `Submission created`. Use **Make an API call** with `webhooks.list` to confirm the registered subscription carries no `idleWindow` (the attach body sends it only for abandoned submissions, never for created or updated).
 4. Open the module's output mapping panel and confirm every question of the selected form is listed under **Answers** and **Answers (display)** by its field key. The list comes from `getSubmissionInterface`; a form that is not published has no field list yet (`fields.list` answers `published: false`), so the module shows the envelope alone until the form is published.
 5. Click **Run once**, then submit selected form.
 6. Confirm one bundle contains `id`, `type`, `createdAt`, `data.form`, `data.submission` (PDF/language), `data.answers` and `data.display`. The type is `submission.completed`. Edit the submission you just sent (the form must allow editing after submit) and confirm this scenario does not run; a trigger set to `Submission updated` receives it as `submission.updated`. `data.answers` values keep their stored type; `data.display` is stable text under the same keys.
-7. Deactivate scenario. Use **Make an API Call** with method `webhooks.list` and selected `formId` to confirm subscription was removed.
+7. Deactivate scenario. Use **Make an API call** with method `webhooks.list` and selected `formId` to confirm subscription was removed.
 8. Reactivate with `Submission abandoned`, select an idle window, save a partial response, and leave it unchanged past that window. Confirm delivered bundle uses `submission.abandoned`. The backend sweeps hourly, so delivery can occur up to about one hour after the selected threshold.
 9. Run error scenario with unknown API method; confirm readable `METHOD_NOT_FOUND` error.
 10. If review is planned, test form picker against workspace with more than 100 forms and retain execution logs showing pagination.
-11. Add **Create a Request** with the same form. Once IML functions are enabled, picking the form lists one input per prefillable field under **Prefill**, one per hidden field under **Context**, and the **Read-only fields** picker; until then `prefill` and `context` are JSON inputs. Set an external ID, run once, and confirm the bundle carries `id`, `url` and `deduplicated: false`. Run again with the same inputs and confirm `deduplicated: true` and the same `url`.
-12. Add **Watch Requests** on the same form with `Request completed`, run once, and complete the request from step 11 through its `url`. Confirm one bundle with `type: request.completed`, `data.request.status: completed`, `data.answers` and `data.display`, and that the Watch Public Link Submissions scenario from step 11 did not run: a completed request fires Watch Requests alone.
-13. Create a second request, add **Cancel a Request** with its `id` and a reason, and confirm the summary comes back `canceled` with `cancelReason`. With Watch Requests on `Request canceled`, confirm one `request.canceled` bundle with only `data.request`.
-14. **Search Requests** on the form with status `canceled`, and **Get a Request** with the completed request's `id`: the mapping panel lists `answers` and `display` per field key once functions are enabled, and the bundle carries `outcome`, `answers`, `display` and `timeline`.
-15. **Remind a Request** on a pending request with a recipient email; confirm `remindersSent` increments, and that a second call within 10 minutes answers `REMINDER_TOO_SOON`.
+11. Add **Create a request** with the same form. Once IML functions are enabled, picking the form lists one input per prefillable field under **Prefill**, one per hidden field under **Context**, and the **Read-only fields** picker; until then `prefill` and `context` are JSON inputs. Set an external ID, run once, and confirm the bundle carries `id`, `url` and `deduplicated: false`. Run again with the same inputs and confirm `deduplicated: true` and the same `url`.
+12. Add **Watch requests** on the same form with `Request completed`, run once, and complete the request from step 11 through its `url`. Confirm one bundle with `type: request.completed`, `data.request.status: completed`, `data.answers` and `data.display`, and that the Watch public link submissions scenario from step 11 did not run: a completed request fires Watch requests alone.
+13. Create a second request, add **Cancel a request** with its `id` and a reason, and confirm the summary comes back `canceled` with `cancelReason`. With Watch requests on `Request canceled`, confirm one `request.canceled` bundle with only `data.request`.
+14. **Search requests** on the form with status `canceled`, and **Get a request** with the completed request's `id`: the mapping panel lists `answers` and `display` per field key once functions are enabled, and the bundle carries `outcome`, `answers`, `display` and `timeline`.
+15. **Remind a request** on a pending request with a recipient email; confirm `remindersSent` increments, and that a second call within 10 minutes answers `REMINDER_TOO_SOON`.
 
 ## 4. Publish
 
