@@ -1,7 +1,7 @@
 {
     "name": "cancelRequest",
-    "label": "Cancel a Request",
-    "description": "Withdraws a pending request: the link stops working, the recipient can no longer complete it, and a request.canceled event reaches Watch Requests. An already completed, expired or canceled request answers REQUEST_NOT_PENDING.",
+    "label": "Cancel a request",
+    "description": "Withdraws a pending request: the link stops working, the recipient can no longer complete it, and a request.canceled event reaches Watch requests. An already completed, expired or canceled request answers REQUEST_NOT_PENDING.",
     "type": "action",
     "actionType": "update",
     "connection": "formbase"

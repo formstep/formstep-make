@@ -1,6 +1,6 @@
 {
     "name": "submission_webhook",
-    "label": "Submission Webhook",
+    "label": "Submission webhook",
     "type": "web",
     "connection": "formbase"
 }

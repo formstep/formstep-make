@@ -416,7 +416,7 @@ test('universal API module forwards method and JSON params through current envel
     const expect = readJson('modules/make_api_call/expect.imljson')
     const outputInterface = readJson('modules/make_api_call/interface.imljson')
 
-    assert.equal(metadata.label, 'Make an API Call')
+    assert.equal(metadata.label, 'Make an API call')
     assert.equal(metadata.type, 'universal')
     assert.equal(metadata.name, 'makeApiCall')
     assert.equal(api.url, '/api/v1')
@@ -462,7 +462,7 @@ test('every module, webhook and RPC is declared and every reference resolves', (
     }
 })
 
-test('Watch Requests delegates lifecycle to the request webhook', () => {
+test('Watch requests delegates lifecycle to the request webhook', () => {
     const metadata = readJson('modules/watch_requests/metadata.imljson')
     const moduleApi = readJson('modules/watch_requests/api.imljson')
     const moduleParameters = readJson('modules/watch_requests/parameters.imljson')
@@ -487,8 +487,8 @@ test('Watch Requests delegates lifecycle to the request webhook', () => {
         eventType.options.map((option) => option.value),
         ['request_completed', 'request_expired', 'request_canceled']
     )
-    // One channel, one event: a completed request never fires Watch Public Link Submissions, and the help says so.
-    assert.match(eventType.help, /never Watch Public Link Submissions/)
+    // One channel, one event: a completed request never fires Watch public link submissions, and the help says so.
+    assert.match(eventType.help, /never Watch public link submissions/)
 
     // Same unsigned receive as the submission webhook: Make never sees the raw body.
     assert.deepEqual(webhook, readJson('webhooks/submission_webhook/api.imljson'))
@@ -529,7 +529,7 @@ test('request event interface carries the request block for every type and answe
         'createdAt', 'completedAt', 'expiredAt', 'canceledAt', 'cancelReason'
     ])
 
-    // The per-key half is the one Watch Public Link Submissions builds, so a field key maps under the same pill.
+    // The per-key half is the one Watch public link submissions builds, so a field key maps under the same pill.
     const submission = iml.buildSubmissionInterface(FIELD_LIST).find((field) => field.name === 'data')
     for (const name of ['form', 'submission', 'answers', 'display']) {
         assert.deepEqual(completedData.spec.find((field) => field.name === name), submission.spec.find((field) => field.name === name))
@@ -563,7 +563,7 @@ test('request event interface carries the request block for every type and answe
     assert.deepEqual(Object.keys(expiredFixture.data), ['request'])
 })
 
-test('Watch Requests static interface fallback is the completed envelope with untyped answers', () => {
+test('Watch requests static interface fallback is the completed envelope with untyped answers', () => {
     const iml = loadImlNamespace()
     const staticInterface = readJson('modules/watch_requests/interface.static.imljson')
 
@@ -577,7 +577,7 @@ test('Watch Requests static interface fallback is the completed envelope with un
     assert.deepEqual(staticInterface, expected)
 })
 
-test('Get a Request reads by request id and lists answers under the form\'s field keys', () => {
+test('Get a request reads by request id and lists answers under the form\'s field keys', () => {
     const iml = loadImlNamespace()
     const metadata = readJson('modules/get_request/metadata.imljson')
     const api = readJson('modules/get_request/api.imljson')
@@ -619,7 +619,7 @@ test('Get a Request reads by request id and lists answers under the form\'s fiel
     assert.deepEqual(staticInterface, untypedAnswers(iml.buildRequestInterface([])))
 })
 
-test('Create a Request builds its per-key inputs from the published field list', () => {
+test('Create a request builds its per-key inputs from the published field list', () => {
     const iml = loadImlNamespace()
     const metadata = readJson('modules/create_request/metadata.imljson')
     const api = readJson('modules/create_request/api.imljson')
@@ -706,7 +706,7 @@ test('Create a Request builds its per-key inputs from the published field list',
     assert.deepEqual(Object.keys(samples), interfaceNames(outputInterface))
 })
 
-test('Create a Request static inputs replace the per-key inputs with JSON until IML functions are enabled', () => {
+test('Create a request static inputs replace the per-key inputs with JSON until IML functions are enabled', () => {
     const expect = readJson('modules/create_request/expect.imljson')
     const staticExpect = readJson('modules/create_request/expect.static.imljson')
 

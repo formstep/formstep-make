@@ -1,7 +1,7 @@
 {
     "name": "watchPublicLinkSubmissions",
-    "label": "Watch Public Link Submissions",
-    "description": "Triggers on one event you pick for submissions through the form's public link: Submission created (submission.completed), Submission updated when the respondent edits a submission they already sent (submission.updated), or Submission abandoned (submission.abandoned). Answers arrive in data.answers keyed by field key, readable text in data.display. A completed request fires Watch Requests instead.",
+    "label": "Watch public link submissions",
+    "description": "Triggers on one event you pick for submissions through the form's public link: Submission created (submission.completed), Submission updated when the respondent edits a submission they already sent (submission.updated), or Submission abandoned (submission.abandoned). Answers arrive in data.answers keyed by field key, readable text in data.display. A completed request fires Watch requests instead.",
     "type": "instant_trigger",
     "connection": "formbase",
     "webhook": "submission_webhook"

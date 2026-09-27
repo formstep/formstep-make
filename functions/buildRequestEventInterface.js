@@ -1,5 +1,5 @@
 /**
- * Builds the Watch Requests output interface from `fields.list` and the
+ * Builds the Watch requests output interface from `fields.list` and the
  * subscribed event type.
  *
  * Every request event is the formbase envelope `{ id, type, createdAt,
@@ -39,17 +39,17 @@ function buildRequestEventInterface(items, eventType) {
                     type: 'collection',
                     label: 'Recipient',
                     spec: [
-                        { name: 'email', type: 'email', label: 'Recipient Email' },
-                        { name: 'name', type: 'text', label: 'Recipient Name' }
+                        { name: 'email', type: 'email', label: 'Recipient email' },
+                        { name: 'name', type: 'text', label: 'Recipient name' }
                     ]
                 },
                 { name: 'metadata', type: 'any', label: 'Metadata' },
                 { name: 'context', type: 'any', label: 'Context' },
-                { name: 'createdAt', type: 'date', label: 'Created At' },
-                { name: 'completedAt', type: 'date', label: 'Completed At' },
-                { name: 'expiredAt', type: 'date', label: 'Expired At' },
-                { name: 'canceledAt', type: 'date', label: 'Canceled At' },
-                { name: 'cancelReason', type: 'text', label: 'Cancel Reason' }
+                { name: 'createdAt', type: 'date', label: 'Created at' },
+                { name: 'completedAt', type: 'date', label: 'Completed at' },
+                { name: 'expiredAt', type: 'date', label: 'Expired at' },
+                { name: 'canceledAt', type: 'date', label: 'Canceled at' },
+                { name: 'cancelReason', type: 'text', label: 'Cancel reason' }
             ]
         }
     ]
@@ -59,10 +59,10 @@ function buildRequestEventInterface(items, eventType) {
 
     return [
         { name: 'id', type: 'text', label: 'Event ID' },
-        { name: 'type', type: 'text', label: 'Event Type' },
-        { name: 'createdAt', type: 'date', label: 'Event Timestamp' },
-        { name: 'apiVersion', type: 'text', label: 'API Version' },
-        { name: 'test', type: 'boolean', label: 'Test Event' },
+        { name: 'type', type: 'text', label: 'Event type' },
+        { name: 'createdAt', type: 'date', label: 'Event timestamp' },
+        { name: 'apiVersion', type: 'text', label: 'API version' },
+        { name: 'test', type: 'boolean', label: 'Test event' },
         { name: 'data', type: 'collection', label: 'Data', spec: dataSpec }
     ]
 }

@@ -45,7 +45,7 @@
     {
         "name": "includeTest",
         "type": "boolean",
-        "label": "Include Test Requests",
+        "label": "Include test requests",
         "required": false,
         "default": false,
         "advanced": true

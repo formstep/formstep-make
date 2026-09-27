@@ -19,7 +19,7 @@
     {
         "name": "url",
         "type": "url",
-        "label": "Request Link"
+        "label": "Request link"
     },
     {
         "name": "workspaceId",
@@ -34,7 +34,7 @@
     {
         "name": "formSnapshotId",
         "type": "text",
-        "label": "Published Version ID"
+        "label": "Published version ID"
     },
     {
         "name": "submissionId",
@@ -44,12 +44,12 @@
     {
         "name": "createdVia",
         "type": "text",
-        "label": "Created Via"
+        "label": "Created via"
     },
     {
         "name": "isTest",
         "type": "boolean",
-        "label": "Test Request"
+        "label": "Test request"
     },
     {
         "name": "language",
@@ -64,12 +64,12 @@
             {
                 "name": "email",
                 "type": "email",
-                "label": "Recipient Email"
+                "label": "Recipient email"
             },
             {
                 "name": "name",
                 "type": "text",
-                "label": "Recipient Name"
+                "label": "Recipient name"
             }
         ]
     },
@@ -96,7 +96,7 @@
     {
         "name": "readonlyKeys",
         "type": "array",
-        "label": "Read-only Field Keys",
+        "label": "Read-only field keys",
         "spec": {
             "type": "text"
         }
@@ -111,7 +111,7 @@
                 {
                     "name": "field",
                     "type": "text",
-                    "label": "Field Key"
+                    "label": "Field key"
                 },
                 {
                     "name": "name",
@@ -126,7 +126,7 @@
                 {
                     "name": "contentType",
                     "type": "text",
-                    "label": "Content Type"
+                    "label": "Content type"
                 }
             ]
         }
@@ -139,92 +139,92 @@
     {
         "name": "deliveryStatus",
         "type": "text",
-        "label": "Delivery Status"
+        "label": "Delivery status"
     },
     {
         "name": "hasCallback",
         "type": "boolean",
-        "label": "Has Callback"
+        "label": "Has callback"
     },
     {
         "name": "callbackFailedAt",
-        "type": "number",
-        "label": "Callback Failed At (Unix ms)"
+        "type": "date",
+        "label": "Callback failed at"
     },
     {
         "name": "expiresAt",
-        "type": "number",
-        "label": "Expires At (Unix ms)"
+        "type": "date",
+        "label": "Expires at"
     },
     {
         "name": "createdAt",
-        "type": "number",
-        "label": "Created At (Unix ms)"
+        "type": "date",
+        "label": "Created at"
     },
     {
         "name": "updatedAt",
-        "type": "number",
-        "label": "Updated At (Unix ms)"
+        "type": "date",
+        "label": "Updated at"
     },
     {
         "name": "openedAt",
-        "type": "number",
-        "label": "Opened At (Unix ms)"
+        "type": "date",
+        "label": "Opened at"
     },
     {
         "name": "startedAt",
-        "type": "number",
-        "label": "Started At (Unix ms)"
+        "type": "date",
+        "label": "Started at"
     },
     {
         "name": "lastActivityAt",
-        "type": "number",
-        "label": "Last Activity At (Unix ms)"
+        "type": "date",
+        "label": "Last activity at"
     },
     {
         "name": "completedAt",
-        "type": "number",
-        "label": "Completed At (Unix ms)"
+        "type": "date",
+        "label": "Completed at"
     },
     {
         "name": "expiredAt",
-        "type": "number",
-        "label": "Expired At (Unix ms)"
+        "type": "date",
+        "label": "Expired at"
     },
     {
         "name": "canceledAt",
-        "type": "number",
-        "label": "Canceled At (Unix ms)"
+        "type": "date",
+        "label": "Canceled at"
     },
     {
         "name": "canceledBy",
         "type": "text",
-        "label": "Canceled By"
+        "label": "Canceled by"
     },
     {
         "name": "cancelReason",
         "type": "text",
-        "label": "Cancel Reason"
+        "label": "Cancel reason"
     },
     {
         "name": "dataPurgedAt",
-        "type": "number",
-        "label": "Data Purged At (Unix ms)"
+        "type": "date",
+        "label": "Data purged at"
     },
     {
         "name": "reminderStep",
         "type": "integer",
-        "label": "Reminder Step"
+        "label": "Reminder step"
     },
     {
         "name": "remindersSent",
         "type": "integer",
-        "label": "Reminders Sent"
+        "label": "Reminders sent"
     },
     {
         "name": "reminderDueAt",
-        "type": "number",
-        "label": "Reminder Due At (Unix ms)"
+        "type": "date",
+        "label": "Reminder due at"
     },
     {
         "name": "answers",
@@ -253,33 +253,33 @@
                 },
                 {
                     "name": "at",
-                    "type": "number",
-                    "label": "At (Unix ms)"
+                    "type": "date",
+                    "label": "At"
                 },
                 {
                     "name": "type",
                     "type": "text",
-                    "label": "Entry Type"
+                    "label": "Entry type"
                 },
                 {
                     "name": "deliveryStatus",
                     "type": "text",
-                    "label": "Delivery Status"
+                    "label": "Delivery status"
                 },
                 {
                     "name": "attemptCount",
                     "type": "integer",
-                    "label": "Attempt Count"
+                    "label": "Attempt count"
                 },
                 {
                     "name": "eventType",
                     "type": "text",
-                    "label": "Callback Event Type"
+                    "label": "Callback event type"
                 },
                 {
                     "name": "canceledBy",
                     "type": "text",
-                    "label": "Canceled By"
+                    "label": "Canceled by"
                 },
                 {
                     "name": "detail",

@@ -1,5 +1,5 @@
 {
     "name": "listForms",
-    "label": "List Forms",
+    "label": "List forms",
     "connection": "formbase"
 }

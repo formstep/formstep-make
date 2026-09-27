@@ -5,7 +5,7 @@
         "label": "Form",
         "required": true,
         "mappable": false,
-        "help": "The form to watch. Public-link submissions only; a completed request fires Watch Requests instead.",
+        "help": "The form to watch. Public-link submissions only; a completed request fires Watch requests instead.",
         "options": {
             "store": "rpc://listForms"
         }

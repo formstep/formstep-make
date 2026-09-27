@@ -7,22 +7,22 @@
     {
         "name": "type",
         "type": "text",
-        "label": "Event Type"
+        "label": "Event type"
     },
     {
         "name": "createdAt",
         "type": "date",
-        "label": "Event Timestamp"
+        "label": "Event timestamp"
     },
     {
         "name": "apiVersion",
         "type": "text",
-        "label": "API Version"
+        "label": "API version"
     },
     {
         "name": "test",
         "type": "boolean",
-        "label": "Test Event"
+        "label": "Test event"
     },
     {
         "name": "data",
@@ -69,12 +69,12 @@
                             {
                                 "name": "email",
                                 "type": "email",
-                                "label": "Recipient Email"
+                                "label": "Recipient email"
                             },
                             {
                                 "name": "name",
                                 "type": "text",
-                                "label": "Recipient Name"
+                                "label": "Recipient name"
                             }
                         ]
                     },
@@ -91,27 +91,27 @@
                     {
                         "name": "createdAt",
                         "type": "date",
-                        "label": "Created At"
+                        "label": "Created at"
                     },
                     {
                         "name": "completedAt",
                         "type": "date",
-                        "label": "Completed At"
+                        "label": "Completed at"
                     },
                     {
                         "name": "expiredAt",
                         "type": "date",
-                        "label": "Expired At"
+                        "label": "Expired at"
                     },
                     {
                         "name": "canceledAt",
                         "type": "date",
-                        "label": "Canceled At"
+                        "label": "Canceled at"
                     },
                     {
                         "name": "cancelReason",
                         "type": "text",
-                        "label": "Cancel Reason"
+                        "label": "Cancel reason"
                     }
                 ]
             },
@@ -128,12 +128,12 @@
                     {
                         "name": "name",
                         "type": "text",
-                        "label": "Form Name"
+                        "label": "Form name"
                     },
                     {
                         "name": "snapshotId",
                         "type": "text",
-                        "label": "Published Version ID"
+                        "label": "Published version ID"
                     }
                 ],
                 "help": "Present only on request.completed."
@@ -151,32 +151,32 @@
                     {
                         "name": "respondentEmail",
                         "type": "email",
-                        "label": "Respondent Email"
+                        "label": "Respondent email"
                     },
                     {
                         "name": "submittedAt",
                         "type": "date",
-                        "label": "Submitted At"
+                        "label": "Submitted at"
                     },
                     {
                         "name": "updatedAt",
                         "type": "date",
-                        "label": "Last Edited At"
+                        "label": "Last edited at"
                     },
                     {
                         "name": "editCount",
                         "type": "uinteger",
-                        "label": "Edit Count"
+                        "label": "Edit count"
                     },
                     {
                         "name": "pdfUrl",
                         "type": "url",
-                        "label": "Submission PDF Link"
+                        "label": "Submission PDF link"
                     },
                     {
                         "name": "language",
                         "type": "text",
-                        "label": "Submission Language"
+                        "label": "Submission language"
                     }
                 ],
                 "help": "Present only on request.completed."

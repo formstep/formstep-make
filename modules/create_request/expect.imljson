@@ -14,14 +14,14 @@
     {
         "name": "recipientEmail",
         "type": "email",
-        "label": "Recipient Email",
+        "label": "Recipient email",
         "required": false,
         "help": "Required to send the invitation or reminders by email."
     },
     {
         "name": "recipientName",
         "type": "text",
-        "label": "Recipient Name",
+        "label": "Recipient name",
         "required": false
     },
     {
@@ -72,7 +72,7 @@
     {
         "name": "expiresAt",
         "type": "date",
-        "label": "Expires At",
+        "label": "Expires at",
         "required": false,
         "advanced": true,
         "help": "When the request link stops working. Default 30 days, at most 365."
@@ -83,15 +83,15 @@
         "label": "Metadata",
         "required": false,
         "advanced": true,
-        "help": "JSON object for your own bookkeeping. Never shown to the recipient, echoed in every event and in Get a Request."
+        "help": "JSON object for your own bookkeeping. Never shown to the recipient, echoed in every event and in Get a request."
     },
     {
         "name": "test",
         "type": "boolean",
-        "label": "Test Request",
+        "label": "Test request",
         "required": false,
         "default": false,
         "advanced": true,
-        "help": "A dry run: nothing is emailed, the link opens and can be completed, and the request never counts against the quota. Test requests are left out of Search Requests and never reach Watch Requests or Watch Public Link Submissions."
+        "help": "A dry run: nothing is emailed, the link opens and can be completed, and the request never counts against the quota. Test requests are left out of Search requests and never reach Watch requests or Watch public link submissions."
     }
 ]

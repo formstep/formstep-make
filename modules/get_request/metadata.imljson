@@ -1,6 +1,6 @@
 {
     "name": "getRequest",
-    "label": "Get a Request",
+    "label": "Get a request",
     "description": "Returns one request: status, outcome, recipient, request link and timeline, plus the answers keyed by field key once the recipient has completed it. Answers are null until then.",
     "type": "action",
     "actionType": "read",

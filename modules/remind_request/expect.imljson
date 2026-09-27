@@ -4,6 +4,6 @@
         "type": "text",
         "label": "Request ID",
         "required": true,
-        "help": "The `id` returned by Create a Request, Search Requests or a Watch Requests event."
+        "help": "The `id` returned by Create a request, Search requests or a Watch requests event."
     }
 ]

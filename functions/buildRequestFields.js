@@ -1,5 +1,5 @@
 /**
- * Builds the Create a Request inputs that depend on the form, from `fields.list`.
+ * Builds the Create a request inputs that depend on the form, from `fields.list`.
  *
  * `requests.create` addresses every question by field key, so the module cannot
  * know its inputs until a form is picked. This function turns the published

@@ -1,5 +1,5 @@
 {
     "name": "getRequestEventInterface",
-    "label": "Get Request Event Interface",
+    "label": "Get request event interface",
     "connection": "formbase"
 }

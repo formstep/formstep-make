@@ -1,5 +1,5 @@
 {
     "name": "getSampleSubmission",
-    "label": "Get Sample Submission",
+    "label": "Get sample submission",
     "connection": "formbase"
 }

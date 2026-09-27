@@ -1,6 +1,6 @@
 {
     "name": "createRequest",
-    "label": "Create a Request",
+    "label": "Create a request",
     "description": "Creates a request: assigns a published form to one recipient and returns the request link. Prefill answers and hidden-field context are keyed by field key. When an external ID is set it doubles as the idempotency key, so a re-run scenario reuses the request instead of creating a second one.",
     "type": "action",
     "actionType": "create",

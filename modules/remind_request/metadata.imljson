@@ -1,6 +1,6 @@
 {
     "name": "remindRequest",
-    "label": "Remind a Request",
+    "label": "Remind a request",
     "description": "Emails the recipient a reminder now, outside the request's reminder schedule. Needs a recipient email and the reminders feature on the workspace plan; at least 10 minutes between manual reminders and at most 8 reminders per request in total.",
     "type": "action",
     "actionType": "update",

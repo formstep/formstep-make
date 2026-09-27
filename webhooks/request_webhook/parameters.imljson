@@ -17,7 +17,7 @@
         "required": true,
         "mappable": false,
         "default": "request_completed",
-        "help": "A completed request fires Watch Requests only, never Watch Public Link Submissions. Test requests never reach this trigger.",
+        "help": "A completed request fires Watch requests only, never Watch public link submissions. Test requests never reach this trigger.",
         "options": [
             {
                 "label": "Request completed",

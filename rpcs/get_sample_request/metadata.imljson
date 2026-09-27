@@ -1,5 +1,5 @@
 {
     "name": "getSampleRequest",
-    "label": "Get Sample Request",
+    "label": "Get sample request",
     "connection": "formbase"
 }

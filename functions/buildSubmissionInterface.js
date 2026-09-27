@@ -1,5 +1,5 @@
 /**
- * Builds the Watch Public Link Submissions output interface from `fields.list`.
+ * Builds the Watch public link submissions output interface from `fields.list`.
  *
  * Every event is the formbase envelope `{ id, type, createdAt, apiVersion,
  * test, data }`. The envelope half is fixed; the per-form half is not, so the
@@ -43,7 +43,7 @@ function buildSubmissionInterface(items) {
             { name: 'status', type: 'text', label: 'Status' },
             { name: 'start', type: 'date', label: 'Start' },
             { name: 'end', type: 'date', label: 'End' },
-            { name: 'timeZone', type: 'text', label: 'Time Zone' },
+            { name: 'timeZone', type: 'text', label: 'Time zone' },
             {
                 name: 'attendee',
                 type: 'collection',
@@ -54,21 +54,21 @@ function buildSubmissionInterface(items) {
                 ]
             },
             { name: 'meetingUrl', type: 'url', label: 'Meeting URL' },
-            { name: 'eventTitle', type: 'text', label: 'Event Title' },
+            { name: 'eventTitle', type: 'text', label: 'Event title' },
             { name: 'provider', type: 'text', label: 'Provider' },
-            { name: 'providerBookingId', type: 'text', label: 'Provider Booking ID' }
+            { name: 'providerBookingId', type: 'text', label: 'Provider booking ID' }
         ],
         payment: [
             { name: 'status', type: 'text', label: 'Status' },
             { name: 'amount', type: 'number', label: 'Amount' },
             { name: 'currency', type: 'text', label: 'Currency' },
-            { name: 'amountRefunded', type: 'number', label: 'Amount Refunded' },
+            { name: 'amountRefunded', type: 'number', label: 'Amount refunded' },
             { name: 'receiptUrl', type: 'url', label: 'Receipt URL' },
-            { name: 'paidAt', type: 'date', label: 'Paid At' },
-            { name: 'refundedAt', type: 'date', label: 'Refunded At' },
-            { name: 'disputedAt', type: 'date', label: 'Disputed At' },
+            { name: 'paidAt', type: 'date', label: 'Paid at' },
+            { name: 'refundedAt', type: 'date', label: 'Refunded at' },
+            { name: 'disputedAt', type: 'date', label: 'Disputed at' },
             { name: 'provider', type: 'text', label: 'Provider' },
-            { name: 'providerPaymentIntentId', type: 'text', label: 'Provider Payment Intent ID' }
+            { name: 'providerPaymentIntentId', type: 'text', label: 'Provider payment intent ID' }
         ]
     }
 
@@ -123,10 +123,10 @@ function buildSubmissionInterface(items) {
 
     return [
         { name: 'id', type: 'text', label: 'Event ID' },
-        { name: 'type', type: 'text', label: 'Event Type' },
-        { name: 'createdAt', type: 'date', label: 'Event Timestamp' },
-        { name: 'apiVersion', type: 'text', label: 'API Version' },
-        { name: 'test', type: 'boolean', label: 'Test Event' },
+        { name: 'type', type: 'text', label: 'Event type' },
+        { name: 'createdAt', type: 'date', label: 'Event timestamp' },
+        { name: 'apiVersion', type: 'text', label: 'API version' },
+        { name: 'test', type: 'boolean', label: 'Test event' },
         {
             name: 'data',
             type: 'collection',
@@ -138,8 +138,8 @@ function buildSubmissionInterface(items) {
                     label: 'Form',
                     spec: [
                         { name: 'id', type: 'text', label: 'Form ID' },
-                        { name: 'name', type: 'text', label: 'Form Name' },
-                        { name: 'snapshotId', type: 'text', label: 'Published Version ID' }
+                        { name: 'name', type: 'text', label: 'Form name' },
+                        { name: 'snapshotId', type: 'text', label: 'Published version ID' }
                     ]
                 },
                 {
@@ -148,12 +148,12 @@ function buildSubmissionInterface(items) {
                     label: 'Submission',
                     spec: [
                         { name: 'id', type: 'text', label: 'Submission ID' },
-                        { name: 'respondentEmail', type: 'email', label: 'Respondent Email' },
-                        { name: 'submittedAt', type: 'date', label: 'Submitted At' },
-                        { name: 'updatedAt', type: 'date', label: 'Last Edited At' },
-                        { name: 'editCount', type: 'uinteger', label: 'Edit Count' },
-                        { name: 'pdfUrl', type: 'url', label: 'Submission PDF Link' },
-                        { name: 'language', type: 'text', label: 'Submission Language' }
+                        { name: 'respondentEmail', type: 'email', label: 'Respondent email' },
+                        { name: 'submittedAt', type: 'date', label: 'Submitted at' },
+                        { name: 'updatedAt', type: 'date', label: 'Last edited at' },
+                        { name: 'editCount', type: 'uinteger', label: 'Edit count' },
+                        { name: 'pdfUrl', type: 'url', label: 'Submission PDF link' },
+                        { name: 'language', type: 'text', label: 'Submission language' }
                     ]
                 },
                 {

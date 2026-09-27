@@ -12,24 +12,24 @@
     {
         "name": "url",
         "type": "url",
-        "label": "Request Link",
+        "label": "Request link",
         "help": "The secret link the recipient opens. Persist it if the scenario delivers it itself."
     },
     {
         "name": "deliveryStatus",
         "type": "text",
-        "label": "Delivery Status",
+        "label": "Delivery status",
         "help": "not_requested unless the invitation was emailed, then queued, sent, failed or bounced."
     },
     {
         "name": "expiresAt",
-        "type": "number",
-        "label": "Expires At (Unix ms)"
+        "type": "date",
+        "label": "Expires at"
     },
     {
         "name": "createdAt",
-        "type": "number",
-        "label": "Created At (Unix ms)"
+        "type": "date",
+        "label": "Created at"
     },
     {
         "name": "externalId",
