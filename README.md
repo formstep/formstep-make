@@ -229,5 +229,5 @@ Make review requires sanitization, error handling, interfaces, pagination, limit
 - [Make attached webhooks](https://developers.make.com/custom-apps-documentation/app-components/webhooks/dedicated/attached)
 - [Make instant triggers](https://developers.make.com/custom-apps-documentation/app-components/modules/instant-trigger)
 - [Make app review prerequisites](https://developers.make.com/custom-apps-documentation/app-review/prerequisites)
-- [formbase REST API](https://docs.formbase.so/developers/rest-api)
-- [formbase webhooks](https://docs.formbase.so/developers/webhooks-reference)
+- [formbase REST API](https://docs.formstep.io/developers/rest-api)
+- [formbase webhooks](https://docs.formstep.io/developers/webhooks-reference)

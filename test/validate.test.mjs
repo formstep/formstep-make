@@ -128,7 +128,7 @@ test('all IML mirror files contain valid JSON', () => {
 
 test('base uses OAuth bearer auth, envelope errors, and sanitized logs', () => {
     const base = readJson('app/base.imljson')
-    assert.equal(base.baseUrl, 'https://api.formbase.so')
+    assert.equal(base.baseUrl, 'https://api.formstep.io')
     assert.equal(base.headers.Authorization, 'Bearer {{connection.accessToken}}')
     assert.equal(base.response.error['401'].type, 'InvalidAccessTokenError')
     assert.equal(base.response.error['429'].type, 'RateLimitError')
@@ -145,14 +145,14 @@ test('OAuth connection implements PKCE, confidential client auth, rotation, and 
     assert.equal(common.clientSecret, 'REPLACE_IN_MAKE_DEVELOPER_HUB')
     assert.deepEqual(scope, ['api:read', 'api:write', 'offline_access'])
 
-    assert.equal(communication.authorize.url, 'https://api.formbase.so/oauth/authorize')
+    assert.equal(communication.authorize.url, 'https://api.formstep.io/oauth/authorize')
     assert.equal(communication.authorize.qs.redirect_uri, '{{oauth.localRedirectUri}}')
     assert.equal(communication.authorize.qs.code_challenge_method, 'S256')
     assert.match(communication.authorize.qs.code_challenge, /sha256\(temp\.codeVerifier/)
     assert.match(communication.authorize.qs.code_challenge, /replace\(replace\(replace/)
     assert.equal(communication.authorize.qs.code_challenge.includes('base64url('), false)
 
-    assert.equal(communication.token.url, 'https://api.formbase.so/oauth/token')
+    assert.equal(communication.token.url, 'https://api.formstep.io/oauth/token')
     assert.equal(communication.token.type, 'urlencoded')
     assert.equal(communication.token.body.grant_type, 'authorization_code')
     assert.equal(communication.token.body.code_verifier, '{{temp.codeVerifier}}')

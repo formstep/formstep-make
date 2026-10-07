@@ -3,7 +3,7 @@
         "temp": {
             "codeVerifier": "{{uuid}}"
         },
-        "url": "https://api.formbase.so/oauth/authorize",
+        "url": "https://api.formstep.io/oauth/authorize",
         "qs": {
             "client_id": "{{common.clientId}}",
             "redirect_uri": "{{oauth.localRedirectUri}}",
@@ -19,7 +19,7 @@
         }
     },
     "token": {
-        "url": "https://api.formbase.so/oauth/token",
+        "url": "https://api.formstep.io/oauth/token",
         "method": "POST",
         "type": "urlencoded",
         "body": {
@@ -53,7 +53,7 @@
     },
     "refresh": {
         "condition": "{{data.expires < addMinutes(now, 15)}}",
-        "url": "https://api.formbase.so/oauth/token",
+        "url": "https://api.formstep.io/oauth/token",
         "method": "POST",
         "type": "urlencoded",
         "body": {
@@ -83,7 +83,7 @@
         }
     },
     "info": {
-        "url": "https://api.formbase.so/api/v1",
+        "url": "https://api.formstep.io/api/v1",
         "method": "POST",
         "headers": {
             "Authorization": "Bearer {{connection.accessToken}}"

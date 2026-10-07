@@ -1,5 +1,5 @@
 {
-    "baseUrl": "https://api.formbase.so",
+    "baseUrl": "https://api.formstep.io",
     "headers": {
         "Authorization": "Bearer {{connection.accessToken}}"
     },
