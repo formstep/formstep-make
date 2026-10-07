@@ -1,10 +1,10 @@
-# formbase
+# Formstep
 
-formbase collects and verifies customer information for workflows and AI agents. A caller creates a request, the customer completes a branded form, and formbase hands the answers back to your scenario.
+Formstep collects and verifies customer information for workflows and AI agents. A caller creates a request, the customer completes a branded form, and Formstep hands the answers back to your scenario.
 
 ## Connection
 
-Sign in with your formbase account (OAuth 2.0). One connection covers one workspace.
+Sign in with your Formstep account (OAuth 2.0). One connection covers one workspace.
 
 ## Modules
 
@@ -15,9 +15,9 @@ Sign in with your formbase account (OAuth 2.0). One connection covers one worksp
 - **Remind a request**: emails the recipient a reminder now.
 - **Search requests**: lists a form's requests by status or external ID.
 - **Watch public link submissions** (instant trigger): fires on the event you pick for submissions through the form's public link: Submission created, Submission updated (the respondent edits a submission they already sent) or Submission abandoned. Answers arrive under `data.answers` keyed by field key and readable text under `data.display`. A completed request fires Watch requests instead (one channel, one event).
-- **Make an API call**: calls any formbase API method with a JSON parameters object. See https://docs.formstep.io/developers/rest-api.
+- **Make an API call**: calls any Formstep API method with a JSON parameters object. See https://docs.formstep.io/developers/rest-api.
 
-Deliveries to Make are not signed: a Make custom-app webhook never sees the raw request body, so the `X-formbase-Signature` header cannot be verified. The unguessable `hook.make.com` URL over HTTPS protects them.
+Deliveries to Make are not signed: a Make custom-app webhook never sees the raw request body, so the `X-Formstep-Signature` header cannot be verified. The unguessable `hook.make.com` URL over HTTPS protects them.
 
 ## Links
 

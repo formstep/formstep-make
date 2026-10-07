@@ -96,7 +96,7 @@
             "valid": {
                 "condition": "{{body.ok == true && length(body.data.items) > 0}}",
                 "type": "InvalidConfigurationError",
-                "message": "No formbase workspace is available for this connection."
+                "message": "No Formstep workspace is available for this connection."
             },
             "error": {
                 "message": "[{{body.error.code}}] {{body.error.message}}"

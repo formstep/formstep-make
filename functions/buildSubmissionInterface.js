@@ -1,7 +1,7 @@
 /**
  * Builds the Watch public link submissions output interface from `fields.list`.
  *
- * Every event is the formbase envelope `{ id, type, createdAt, apiVersion,
+ * Every event is the Formstep envelope `{ id, type, createdAt, apiVersion,
  * test, data }`. The envelope half is fixed; the per-form half is not, so the
  * `data.answers` and `data.display` collections are filled from the published
  * field list of the selected form: one item per field key, labelled with the
@@ -13,7 +13,7 @@
  * mappable.
  */
 function buildSubmissionInterface(items) {
-    // formbase question type -> Make interface type for a single-valued
+    // Formstep question type -> Make interface type for a single-valued
     // answer. Anything unlisted stays `any`: the stored value keeps its own
     // JSON shape in data.answers.
     var TYPE_BY_INPUT_TYPE = {
@@ -35,7 +35,7 @@ function buildSubmissionInterface(items) {
     }
     // Choice questions whose answer is a list of option keys.
     var MULTI_OPTION_TYPES = { checkbox: true, 'picture-choice': true, ranking: true }
-    // A booking and a payment answer are objects (formbase
+    // A booking and a payment answer are objects (Formstep
     // docs/external-api.md § Events, "Bookings and payments"), so each
     // property is mappable on its own.
     var OBJECT_SPEC_BY_INPUT_TYPE = {

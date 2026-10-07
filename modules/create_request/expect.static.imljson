@@ -54,7 +54,7 @@
         "label": "Delivery",
         "required": false,
         "default": "none",
-        "help": "Whether formbase emails the invitation. With `none` the scenario delivers the request link itself.",
+        "help": "Whether Formstep emails the invitation. With `none` the scenario delivers the request link itself.",
         "options": [
             {
                 "label": "I deliver the link myself",

@@ -1,6 +1,6 @@
-# formbase Make integration
+# Formstep Make integration
 
-Git-tracked mirror of formbase custom app configuration for [Make Developer Hub](https://developers.make.com/custom-apps-documentation/). Make hosts and executes these definitions; this repository supplies reviewable IML JSON, contract tests, and deployment instructions.
+Git-tracked mirror of the Formstep custom app configuration for [Make Developer Hub](https://developers.make.com/custom-apps-documentation/). Make hosts and executes these definitions; this repository supplies reviewable IML JSON, contract tests, and deployment instructions.
 
 ## Integration surface
 
@@ -16,17 +16,17 @@ Git-tracked mirror of formbase custom app configuration for [Make Developer Hub]
 - **Search requests** (`requests.list`) by form, status and external ID, following `nextCursor`
 - Dynamic sample payloads from `submissions.sample` and `requests.sample`
 - Dynamic output interfaces from `fields.list`, so every answer is mappable under its own field key: a choice answer as its option key, a multi-choice answer as a list of keys, a matrix as one item per row, a repeating group as an array of rows, a booking or a payment as one item per property. Watch requests and Get a request reuse the `buildSubmissionInterface` function through the `iml` namespace, so a field key maps under the same pill in every module
-- Universal **Make an API call** module for other formbase JSON-RPC methods
-- Unsigned webhooks, by necessity, for submissions and requests alike: a Make custom-app webhook sees only the parsed `body`, `headers` and `query`, never the raw bytes, and holds no per-subscription secret at receive time, so `X-formbase-Signature` cannot be verified here. Deliveries are protected by the unguessable `hook.make.com` URL over HTTPS; Zapier and n8n verify signatures because their runtimes expose the raw body
-- Every event is the formbase envelope `{ id, type, createdAt, apiVersion, test, data }`: `data.answers` holds each answer once under its field key, `data.display` the readable text under the same key, `data.submission` the email/date/PDF/language, and on request events `data.request` the request block
+- Universal **Make an API call** module for other Formstep JSON-RPC methods
+- Unsigned webhooks, by necessity, for submissions and requests alike: a Make custom-app webhook sees only the parsed `body`, `headers` and `query`, never the raw bytes, and holds no per-subscription secret at receive time, so `X-Formstep-Signature` cannot be verified here. Deliveries are protected by the unguessable `hook.make.com` URL over HTTPS; Zapier and n8n verify signatures because their runtimes expose the raw body
+- Every event is the Formstep envelope `{ id, type, createdAt, apiVersion, test, data }`: `data.answers` holds each answer once under its field key, `data.display` the readable text under the same key, `data.submission` the email/date/PDF/language, and on request events `data.request` the request block
 - Event `type` values: `submission.completed`, `submission.updated`, `submission.abandoned`, `request.completed`, `request.expired` and `request.canceled`
 
-Implementation follows current formbase [n8n](https://github.com/formbaseso/n8n-nodes-formbase) and [Zapier](https://github.com/formbaseso/formbase-zapier) integrations. Canonical API contract lives in [formbaseso/formbase](https://github.com/formbaseso/formbase/tree/main/packages/convex/src/http/external_api).
+Implementation follows current Formstep [n8n](https://github.com/formstep/n8n-nodes-formstep) and [Zapier](https://github.com/formstep/formstep-zapier) integrations. Canonical API contract lives in [formstep/formstep](https://github.com/formstep/formstep/tree/main/packages/convex/src/http/external_api).
 
 ## Repository map
 
 ```text
-formbase-make/
+formstep-make/
 ├── app/                         # Base and app settings
 ├── connections/formbase/        # OAuth connection, common data, scopes
 ├── functions/                   # Custom IML functions (interfaces and inputs built from fields.list)
@@ -61,7 +61,7 @@ npm test
 
 Tests validate JSON syntax plus OAuth, PKCE, refresh rotation, sanitization, API envelopes, pagination, both webhook lifecycles, every module's request body and output interface (including the interfaces and inputs the IML functions build from a field list, and the static fallbacks that must equal them), dynamic samples, and that every `rpc://` and function reference resolves. They do not execute Make's hosted IML runtime; complete live smoke test after importing definitions.
 
-## 1. Deploy formbase OAuth support
+## 1. Deploy Formstep OAuth support
 
 Make needs fixed confidential client credentials. Backend change adds idempotent `seedMakeOAuthClient`, matching existing Zapier seed strategy.
 
@@ -199,7 +199,7 @@ OAuth redirect must remain `oauth.localRedirectUri`. For hosted Make this resolv
 
 Create test scenario in Make:
 
-1. Add **formbase → Watch public link submissions**.
+1. Add **Formstep → Watch public link submissions**.
 2. Create connection. Sign in, select workspace, approve consent. Connection label should show workspace name.
 3. Select form and `Submission created`. Use **Make an API call** with `webhooks.list` to confirm the registered subscription carries no `idleWindow` (the attach body sends it only for abandoned submissions, never for created or updated).
 4. Open the module's output mapping panel and confirm every question of the selected form is listed under **Answers** and **Answers (display)** by its field key. The list comes from `getSubmissionInterface`; a form that is not published has no field list yet (`fields.list` answers `published: false`), so the module shows the envelope alone until the form is published.
@@ -229,5 +229,5 @@ Make review requires sanitization, error handling, interfaces, pagination, limit
 - [Make attached webhooks](https://developers.make.com/custom-apps-documentation/app-components/webhooks/dedicated/attached)
 - [Make instant triggers](https://developers.make.com/custom-apps-documentation/app-components/modules/instant-trigger)
 - [Make app review prerequisites](https://developers.make.com/custom-apps-documentation/app-review/prerequisites)
-- [formbase REST API](https://docs.formstep.io/developers/rest-api)
-- [formbase webhooks](https://docs.formstep.io/developers/webhooks-reference)
+- [Formstep REST API](https://docs.formstep.io/developers/rest-api)
+- [Formstep webhooks](https://docs.formstep.io/developers/webhooks-reference)

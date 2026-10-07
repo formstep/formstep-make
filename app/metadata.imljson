@@ -1,6 +1,6 @@
 {
     "name": "formbase",
-    "label": "formbase",
+    "label": "Formstep",
     "description": "Build forms and route submissions to your stack.",
     "version": 2,
     "language": "en",

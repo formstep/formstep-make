@@ -1,5 +1,5 @@
 {
     "name": "formbase",
-    "label": "formbase OAuth 2.0",
+    "label": "Formstep OAuth 2.0",
     "type": "oauth2"
 }

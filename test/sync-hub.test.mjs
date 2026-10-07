@@ -142,7 +142,7 @@ test('JSON sections compare equal across whitespace, comments, trailing commas a
     // Comment markers and commas inside strings are content, not syntax.
     assert.equal(canonicalJson('{ "url": "https://x.test/a,}" }'), '{"url":"https://x.test/a,}"}')
 
-    assert.ok(sectionsEqual('markdown', '# formbase\n', '# formbase\r\n\r\n'))
+    assert.ok(sectionsEqual('markdown', '# Formstep\n', '# Formstep\r\n\r\n'))
     assert.equal(sectionsEqual('javascript', 'function a() {}', 'function b() {}'), false)
 })
 
@@ -185,7 +185,7 @@ test('module types and references map to the API create body', () => {
 
 test('connections and webhooks match Hub components by label, in any case, or --map', () => {
     const webhook = { kind: 'webhook', name: 'submission_webhook', metadata: { label: 'Submission webhook' } }
-    const connection = { kind: 'connection', name: 'formbase', metadata: { label: 'formbase OAuth 2.0' } }
+    const connection = { kind: 'connection', name: 'formbase', metadata: { label: 'Formstep OAuth 2.0' } }
     const hubWebhooks = [
         { name: 'formbase-f1d7bp', label: 'Submission Webhook' },
         { name: 'formbase-f1d7bp2', label: 'Old webhook' }
@@ -197,7 +197,7 @@ test('connections and webhooks match Hub components by label, in any case, or --
     assert.throws(() => resolveRemoteName(webhook, hubWebhooks, { submission_webhook: 'missing' }), /no webhook named missing/)
     assert.throws(() => resolveRemoteName(webhook, [...hubWebhooks, { name: 'x', label: 'submission webhook' }]), /Several/)
     // The app's only connection is the one to sync, whatever its label.
-    assert.equal(resolveRemoteName(connection, [{ name: 'formbase-f1d7bp', label: 'formbase' }]), 'formbase-f1d7bp')
+    assert.equal(resolveRemoteName(connection, [{ name: 'formbase-f1d7bp', label: 'formbase OAuth 2.0' }]), 'formbase-f1d7bp')
     assert.equal(resolveRemoteName({ kind: 'module', name: 'getRequest' }, [{ name: 'getRequest' }]), 'getRequest')
     assert.equal(resolveRemoteName({ kind: 'module', name: 'getRequest' }, [{ name: 'watchSubmissions' }]), null)
 })

@@ -14,7 +14,7 @@
  * `requests.create` refuses an unpublished form anyway.
  */
 function buildRequestFields(items) {
-    // formbase question type -> Make parameter type for a single-valued prefill.
+    // Formstep question type -> Make parameter type for a single-valued prefill.
     // Anything unlisted falls back to `text`.
     var TYPE_BY_INPUT_TYPE = {
         text: 'text',

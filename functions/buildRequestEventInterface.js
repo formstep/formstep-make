@@ -2,7 +2,7 @@
  * Builds the Watch requests output interface from `fields.list` and the
  * subscribed event type.
  *
- * Every request event is the formbase envelope `{ id, type, createdAt,
+ * Every request event is the Formstep envelope `{ id, type, createdAt,
  * apiVersion, test, data }` with `data.request` for every type. A
  * `request.completed` event also carries `data.form`, `data.submission`,
  * `data.answers` and `data.display`, identical to a `submission.completed`
