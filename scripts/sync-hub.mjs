@@ -5,7 +5,7 @@
  *   npm run sync:hub                 dry run: read the Hub, compare, print the plan
  *   npm run sync:hub -- --apply      create missing components, push differing sections
  *
- * Flags: --static (default while formbase#207 is open) pushes the `*.static.imljson`
+ * Flags: --static (default while formstep#207 is open) pushes the `*.static.imljson`
  * twins and skips IML functions and the RPCs that call them; --dynamic pushes both.
  * --map <repo name>=<hub name> pins a connection or webhook to a Hub component when
  * its label does not match.
@@ -25,7 +25,7 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const API_BASE = 'https://eu1.make.com/api/v2'
 const APP_NAME = 'formbase-f1d7bp'
 const APP_VERSION = 1
-const ENV_FILE = path.join(os.homedir(), '.config', 'formbase-make', '.env')
+const ENV_FILE = path.join(os.homedir(), '.config', 'formstep-make', '.env')
 export const SECRET_PLACEHOLDER = 'REPLACE_IN_MAKE_DEVELOPER_HUB'
 
 export const CONTENT_TYPES = {
@@ -199,7 +199,7 @@ export function collectLocalApp(root, { mode }) {
     })
     for (const fn of orderFunctions(functions)) {
         if (mode === 'dynamic') components.push(fn)
-        else skipped.push({ kind: 'function', name: fn.name, reason: 'static mode: IML functions are locked until formbase#207' })
+        else skipped.push({ kind: 'function', name: fn.name, reason: 'static mode: IML functions are locked until formstep#207' })
     }
 
     for (const directory of listDirectories(root, 'rpcs')) {
@@ -629,7 +629,7 @@ function sectionLabel(section) {
 
 function printPlan(plan, { mode, apply }) {
     const lines = []
-    const modeNote = mode === 'static' ? 'static mode, IML functions locked (formbase#207)' : 'dynamic mode'
+    const modeNote = mode === 'static' ? 'static mode, IML functions locked (formstep#207)' : 'dynamic mode'
     lines.push(`${APP_NAME} v${APP_VERSION} on ${new URL(API_BASE).host}, ${modeNote}${apply ? '' : ', dry run'}`)
 
     const creates = plan.entries.filter((entry) => entry.create)
@@ -821,7 +821,7 @@ if (invokedDirectly) {
     main(process.argv.slice(2)).catch((error) => {
         console.error(`\n${error.message}`)
         if (error instanceof ApiError && error.apiPath.includes('/functions')) {
-            console.error('\nThe functions endpoint refused the call: the API does not bypass the Hub lock on IML functions (formbase#207). Run without --dynamic.')
+            console.error('\nThe functions endpoint refused the call: the API does not bypass the Hub lock on IML functions (formstep#207). Run without --dynamic.')
         }
         process.exitCode = 1
     })

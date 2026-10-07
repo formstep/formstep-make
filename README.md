@@ -99,11 +99,11 @@ Re-running updates redirect URIs and secret hash, returning `created: false`. Ke
 
 `npm run sync:hub` pushes this repository to the Hub app `formbase-f1d7bp` version 1 through Make's SDK Apps API, using the mapping in the table below.
 
-1. In Make, open your profile → **API access** → **Add token**, with scopes `sdk-apps:read` and `sdk-apps:write`. Save it as `MAKE_API_TOKEN=...` in `~/.config/formbase-make/.env`, or export it. To push connection Common data as well, add `MAKE_OAUTH_CLIENT_SECRET=...` there (the value set in Convex). Without it, Common data is not touched. The script never prints either value.
+1. In Make, open your profile → **API access** → **Add token**, with scopes `sdk-apps:read` and `sdk-apps:write`. Save it as `MAKE_API_TOKEN=...` in `~/.config/formstep-make/.env`, or export it. To push connection Common data as well, add `MAKE_OAUTH_CLIENT_SECRET=...` there (the value set in Convex). Without it, Common data is not touched. The script never prints either value.
 2. Run `npm run sync:hub` first. It is a dry run: it reads every component and section from the Hub and prints the components it would create, the sections that differ (JSON compared without regard to whitespace), and the Hub components the repository does not have. Those are reported and never deleted.
 3. Run `npm run sync:hub -- --apply` to create the missing components, update changed labels and descriptions, and push the differing sections, in the order below.
 
-`--static` (the default while formbase#207 is open) pushes the `*.static.imljson` twins and skips the IML functions and the RPCs that call them, as described below. `--dynamic` pushes functions and the dynamic files. Make names connections and webhooks itself, so the script matches them by label. If a label does not match, pin one with `--map submission_webhook=<hub name>`. The script never publishes, requests review, changes visibility or deletes anything. `app/metadata.imljson` and `app/parameters.imljson` are not synced, because the API has no app parameters section.
+`--static` (the default while formstep#207 is open) pushes the `*.static.imljson` twins and skips the IML functions and the RPCs that call them, as described below. `--dynamic` pushes functions and the dynamic files. Make names connections and webhooks itself, so the script matches them by label. If a label does not match, pin one with `--map submission_webhook=<hub name>`. The script never publishes, requests review, changes visibility or deletes anything. `app/metadata.imljson` and `app/parameters.imljson` are not synced, because the API has no app parameters section.
 
 ### Manual reference
 
@@ -180,7 +180,7 @@ Paste each file into corresponding Hub editor:
 | `modules/make_api_call/interface.imljson` | Universal module → Interface |
 | `modules/make_api_call/samples.imljson` | Universal module → Samples |
 
-Custom IML functions are disabled for a new Make app: the Developer Hub has no Functions tab and the `+` menu offers no "Create Function". Make enables them per app through a helpdesk ticket (https://www.make.com/en/ticket; tracked as formbaseso/formbase#207). Until then skip steps 2, 5, 7, 8 and 9 and paste the static twins instead:
+Custom IML functions are disabled for a new Make app: the Developer Hub has no Functions tab and the `+` menu offers no "Create Function". Make enables them per app through a helpdesk ticket (https://www.make.com/en/ticket; tracked as formstep/formstep#207). Until then skip steps 2, 5, 7, 8 and 9 and paste the static twins instead:
 
 - `modules/watch_public_link_submissions/interface.static.imljson` into Watch public link submissions → Interface
 - `modules/watch_requests/interface.static.imljson` into Watch requests → Interface
