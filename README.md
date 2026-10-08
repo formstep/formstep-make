@@ -54,7 +54,7 @@ formstep-make/
 ## Validate locally
 
 ```bash
-cd /Users/onurhakbilen/git/formbase-make
+cd /Users/onurhakbilen/git/formstep-make
 npm ci
 npm test
 ```
@@ -68,7 +68,7 @@ Make needs fixed confidential client credentials. Backend change adds idempotent
 Deploy changed backend first:
 
 ```bash
-cd /Users/onurhakbilen/git/formbase/packages/convex
+cd /Users/onurhakbilen/git/formstep/packages/convex
 pnpm convex deploy
 ```
 
