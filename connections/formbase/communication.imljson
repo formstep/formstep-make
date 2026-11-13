@@ -6,7 +6,7 @@
         "url": "https://api.formstep.io/oauth/authorize",
         "qs": {
             "client_id": "{{common.clientId}}",
-            "redirect_uri": "https://eu1.make.com/oauth/cb/app",
+            "redirect_uri": "https://{{ifempty(parameters.zone, 'eu1')}}.make.com/oauth/cb/app",
             "response_type": "code",
             "scope": "{{join(oauth.scope, ' ')}}",
             "code_challenge": "{{replace(replace(replace(sha256(temp.codeVerifier, 'base64'), '+', '-'), '/', '_'), '=', '')}}",
@@ -26,7 +26,7 @@
             "grant_type": "authorization_code",
             "code": "{{temp.code}}",
             "code_verifier": "{{temp.codeVerifier}}",
-            "redirect_uri": "https://eu1.make.com/oauth/cb/app",
+            "redirect_uri": "https://{{ifempty(parameters.zone, 'eu1')}}.make.com/oauth/cb/app",
             "client_id": "{{common.clientId}}",
             "client_secret": "{{common.clientSecret}}"
         },

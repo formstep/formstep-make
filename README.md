@@ -82,7 +82,7 @@ Seed production client:
 
 ```bash
 pnpm convex run --prod internal/oauthClients:seedMakeOAuthClient \
-  '{"redirectUris":["https://www.make.com/oauth/cb/app","https://eu1.make.com/oauth/cb/app"]}'
+  '{"redirectUris":["https://www.make.com/oauth/cb/app","https://eu1.make.com/oauth/cb/app","https://eu2.make.com/oauth/cb/app","https://us1.make.com/oauth/cb/app","https://us2.make.com/oauth/cb/app"]}'
 ```
 
 Expected result:
@@ -193,7 +193,7 @@ General settings come from each `metadata.imljson`. Set component connection/web
 
 Before saving connection Common data, replace `REPLACE_IN_MAKE_DEVELOPER_HUB` with same plaintext secret stored in `MAKE_OAUTH_CLIENT_SECRET`. Do not modify repository copy.
 
-The OAuth redirect is `https://eu1.make.com/oauth/cb/app`, written out in `communication.imljson`, not `{{oauth.localRedirectUri}}`. That variable resolves to `https://www.make.com/oauth/cb/app`, and Make's global callback answers "Resource not found" for this app: a custom app lives in the zone it was made in (eu1), and only that zone's callback knows the pending authorization. Formstep allows both URIs on `fboc_make`. When Make approves the app and it becomes available in every zone, switch both `redirect_uri` values back to `{{oauth.localRedirectUri}}`, which the review asks for.
+The OAuth redirect is built from the connection's **Make zone** parameter: `https://{{ifempty(parameters.zone, 'eu1')}}.make.com/oauth/cb/app`, not `{{oauth.localRedirectUri}}`. That variable resolves to `https://www.make.com/oauth/cb/app`, and Make's global callback answers "Resource not found" for this app: an unapproved custom app's pending authorization is known only to the zone the user's organization is in. The user picks the zone from their Make address (eu1, eu2, us1, us2); a connection made before the parameter existed has none and uses eu1, where it was made. Formstep allows all five URIs on `fboc_make`. When Make approves the app, switch both `redirect_uri` values back to `{{oauth.localRedirectUri}}`, which the review asks for, and drop the parameter.
 
 Get a request keeps its Form picker among the mappable parameters with `mappable: false`. As a static parameter of an action, Make ran its `listForms` RPC without the connection and the API answered 401.
 

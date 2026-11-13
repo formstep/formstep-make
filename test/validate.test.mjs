@@ -146,9 +146,15 @@ test('OAuth connection implements PKCE, confidential client auth, rotation, and 
     assert.deepEqual(scope, ['api:read', 'api:write', 'offline_access'])
 
     assert.equal(communication.authorize.url, 'https://api.formstep.io/oauth/authorize')
-    // www.make.com (oauth.localRedirectUri) cannot find an authorization for an app that lives in eu1 only.
-    assert.equal(communication.authorize.qs.redirect_uri, 'https://eu1.make.com/oauth/cb/app')
+    // www.make.com (oauth.localRedirectUri) cannot find an authorization for an unapproved custom app: only the
+    // zone the organization is in can, so the redirect is built from the connection's Make zone (eu1 when unset).
+    assert.equal(communication.authorize.qs.redirect_uri, "https://{{ifempty(parameters.zone, 'eu1')}}.make.com/oauth/cb/app")
     assert.equal(communication.token.body.redirect_uri, communication.authorize.qs.redirect_uri)
+    const connectionParameters = readJson('connections/formbase/parameters.imljson')
+    assert.deepEqual(connectionParameters.map((field) => field.name), ['zone'])
+    assert.equal(connectionParameters[0].required, true)
+    assert.equal(connectionParameters[0].default, 'eu1')
+    assert.deepEqual(connectionParameters[0].options.map((option) => option.value), ['eu1', 'eu2', 'us1', 'us2'])
     assert.equal(communication.authorize.qs.code_challenge_method, 'S256')
     assert.match(communication.authorize.qs.code_challenge, /sha256\(temp\.codeVerifier/)
     assert.match(communication.authorize.qs.code_challenge, /replace\(replace\(replace/)
