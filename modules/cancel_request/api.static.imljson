@@ -1,0 +1,14 @@
+{
+    "url": "/api/v1",
+    "method": "POST",
+    "body": {
+        "method": "requests.cancel",
+        "params": {
+            "requestId": "{{parameters.requestId}}",
+            "reason": "{{parameters.reason}}"
+        }
+    },
+    "response": {
+        "output": "{{body.data}}"
+    }
+}

@@ -97,13 +97,18 @@ test('static mode pushes the static twins and skips functions and the RPCs that 
         local.skipped.filter((item) => item.kind === 'rpc').map((item) => item.name).sort(),
         FUNCTION_BACKED_RPCS
     )
-    assert.equal(local.skipped.filter((item) => item.kind === 'function').length, 4)
+    assert.equal(local.skipped.filter((item) => item.kind === 'function').length, 5)
 
-    // README section 2: exactly these four sections take the static twin.
+    // README section 2: exactly these sections take the static twin.
     const twins = local.components.flatMap((component) => component.sections.filter((section) => section.staticTwin).map((section) => section.file))
     assert.deepEqual(twins.sort(), [
+        'modules/cancel_request/api.static.imljson',
+        'modules/create_request/api.static.imljson',
         'modules/create_request/expect.static.imljson',
+        'modules/get_request/api.static.imljson',
         'modules/get_request/interface.static.imljson',
+        'modules/remind_request/api.static.imljson',
+        'modules/search_requests/api.static.imljson',
         'modules/watch_public_link_submissions/interface.static.imljson',
         'modules/watch_requests/interface.static.imljson'
     ])
@@ -117,7 +122,7 @@ test('dynamic mode pushes functions, every RPC and no static twin', () => {
     const local = collectLocalApp(ROOT, { mode: 'dynamic' })
 
     assert.deepEqual(local.skipped, [])
-    assert.equal(local.components.filter((component) => component.kind === 'function').length, 4)
+    assert.equal(local.components.filter((component) => component.kind === 'function').length, 5)
     for (const name of FUNCTION_BACKED_RPCS) assert.ok(local.components.some((component) => component.name === name), name)
     assert.equal(local.components.some((component) => component.sections.some((section) => section.staticTwin)), false)
 })

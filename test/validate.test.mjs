@@ -599,7 +599,7 @@ test('Get a request reads by request id and lists answers under the form\'s fiel
     assert.equal(api.url, '/api/v1')
     assert.equal(api.body.method, 'requests.get')
     assert.deepEqual(api.body.params, { requestId: '{{parameters.requestId}}' })
-    assert.equal(api.response.output, '{{body.data}}')
+    assert.equal(api.response.output, '{{requestDates(body.data)}}')
     // The form only shapes the mapping panel; the id fetches the request. It is an unmappable
     // mappable parameter, not a static one: Make runs a static parameter's RPC of an action
     // without the connection, so listForms answered 401 there.
@@ -659,7 +659,7 @@ test('Create a request builds its per-key inputs from the published field list',
         test: '{{parameters.test}}'
     })
     assert.equal('callbackUrl' in api.body.params, false)
-    assert.equal(api.response.output, '{{body.data}}')
+    assert.equal(api.response.output, '{{requestDates(body.data)}}')
 
     const formId = expect.find((field) => field.name === 'formId')
     assert.deepEqual(formId.options, { store: 'rpc://listForms', nested: 'rpc://getRequestFields' })
@@ -742,7 +742,7 @@ test('Cancel, Remind and Search return the request summary', () => {
     assert.equal(cancel.url, '/api/v1')
     assert.equal(cancel.body.method, 'requests.cancel')
     assert.deepEqual(cancel.body.params, { requestId: '{{parameters.requestId}}', reason: '{{parameters.reason}}' })
-    assert.equal(cancel.response.output, '{{body.data}}')
+    assert.equal(cancel.response.output, '{{requestDates(body.data)}}')
     assert.deepEqual(cancelExpect.map((field) => [field.name, field.required]), [['requestId', true], ['reason', false]])
 
     const remind = readJson('modules/remind_request/api.imljson')
@@ -750,7 +750,7 @@ test('Cancel, Remind and Search return the request summary', () => {
     assert.equal(remind.url, '/api/v1')
     assert.equal(remind.body.method, 'requests.remind')
     assert.deepEqual(remind.body.params, { requestId: '{{parameters.requestId}}' })
-    assert.equal(remind.response.output, '{{body.data}}')
+    assert.equal(remind.response.output, '{{requestDates(body.data)}}')
     assert.deepEqual(readJson('modules/remind_request/expect.imljson').map((field) => field.name), ['requestId'])
 
     const search = readJson('modules/search_requests/api.imljson')
@@ -767,7 +767,7 @@ test('Cancel, Remind and Search return the request summary', () => {
     })
     assert.equal(search.response.limit, '{{parameters.limit}}')
     assert.equal(search.response.iterate, '{{body.data.items}}')
-    assert.equal(search.response.output, '{{item}}')
+    assert.equal(search.response.output, '{{requestDates(item)}}')
     assert.match(search.pagination.condition, /hasMore/)
     assert.deepEqual(search.pagination.body, { method: 'requests.list', params: { ...search.body.params, cursor: '{{body.data.nextCursor}}' } })
     assert.equal(searchExpect.find((field) => field.name === 'formId').options.store, 'rpc://listForms')
@@ -784,4 +784,30 @@ test('Cancel, Remind and Search return the request summary', () => {
     assert.equal(readJson('modules/cancel_request/samples.imljson').status, 'canceled')
     assert.equal(readJson('modules/remind_request/samples.imljson').remindersSent, 1)
     assert.equal(readJson('modules/search_requests/samples.imljson').status, 'pending')
+})
+
+test('requestDates turns the request times into ISO dates and leaves answers alone', () => {
+    const requestDates = loadImlFunction('functions/requestDates.js', 'requestDates')
+    const request = {
+        id: 'rq_1',
+        status: 'completed',
+        createdAt: 1792195200000,
+        expiresAt: 1794787200000,
+        canceledAt: null,
+        remindersSent: 0,
+        answers: { startAt: 5, signed_on: '2026-04-20' },
+        timeline: [{ type: 'created', at: 1792195200000 }, { type: 'opened', at: 1792195500000, by: 'recipient' }]
+    }
+    const out = requestDates(request)
+    assert.equal(out.createdAt, '2026-10-17T00:00:00.000Z')
+    assert.equal(out.expiresAt, '2026-11-16T00:00:00.000Z')
+    assert.equal(out.canceledAt, null)
+    assert.equal(out.remindersSent, 0)
+    assert.deepEqual(out.answers, { startAt: 5, signed_on: '2026-04-20' })
+    assert.deepEqual(out.timeline, [
+        { type: 'created', at: '2026-10-17T00:00:00.000Z' },
+        { type: 'opened', at: '2026-10-17T00:05:00.000Z', by: 'recipient' }
+    ])
+    assert.equal(request.createdAt, 1792195200000, 'the input is not changed')
+    assert.equal(requestDates(null), null)
 })

@@ -1,0 +1,28 @@
+{
+    "url": "/api/v1",
+    "method": "POST",
+    "body": {
+        "method": "requests.create",
+        "params": {
+            "formId": "{{parameters.formId}}",
+            "recipient": {
+                "email": "{{parameters.recipientEmail}}",
+                "name": "{{parameters.recipientName}}"
+            },
+            "language": "{{parameters.language}}",
+            "prefill": "{{parameters.prefill}}",
+            "context": "{{parameters.context}}",
+            "readonly": "{{parameters.readonly}}",
+            "externalId": "{{parameters.externalId}}",
+            "idempotencyKey": "{{parameters.externalId}}",
+            "metadata": "{{parameters.metadata}}",
+            "delivery": "{{parameters.delivery}}",
+            "reminders": "{{parameters.reminders}}",
+            "expiresAt": "{{if(parameters.expiresAt, parseNumber(formatDate(parameters.expiresAt, 'x')), undefined)}}",
+            "test": "{{parameters.test}}"
+        }
+    },
+    "response": {
+        "output": "{{body.data}}"
+    }
+}

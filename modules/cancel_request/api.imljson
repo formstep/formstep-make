@@ -9,6 +9,6 @@
         }
     },
     "response": {
-        "output": "{{body.data}}"
+        "output": "{{requestDates(body.data)}}"
     }
 }

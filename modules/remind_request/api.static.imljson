@@ -1,0 +1,13 @@
+{
+    "url": "/api/v1",
+    "method": "POST",
+    "body": {
+        "method": "requests.remind",
+        "params": {
+            "requestId": "{{parameters.requestId}}"
+        }
+    },
+    "response": {
+        "output": "{{body.data}}"
+    }
+}
