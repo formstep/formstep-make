@@ -82,7 +82,7 @@ Seed production client:
 
 ```bash
 pnpm convex run --prod internal/oauthClients:seedMakeOAuthClient \
-  '{"redirectUris":["https://www.make.com/oauth/cb/app"]}'
+  '{"redirectUris":["https://www.make.com/oauth/cb/app","https://eu1.make.com/oauth/cb/app"]}'
 ```
 
 Expected result:
@@ -103,7 +103,7 @@ Re-running updates redirect URIs and secret hash, returning `created: false`. Ke
 2. Run `npm run sync:hub` first. It is a dry run: it reads every component and section from the Hub and prints the components it would create, the sections that differ (JSON compared without regard to whitespace), and the Hub components the repository does not have. Those are reported and never deleted.
 3. Run `npm run sync:hub -- --apply` to create the missing components, update changed labels and descriptions, and push the differing sections, in the order below.
 
-`--static` (the default while formstep#207 is open) pushes the `*.static.imljson` twins and skips the IML functions and the RPCs that call them, as described below. `--dynamic` pushes functions and the dynamic files. Make names connections and webhooks itself, so the script matches them by label. If a label does not match, pin one with `--map submission_webhook=<hub name>`. The script never publishes, requests review, changes visibility or deletes anything. `app/metadata.imljson` and `app/parameters.imljson` are not synced, because the API has no app parameters section.
+`--dynamic` (the default) pushes the IML functions and the dynamic files. `--static` pushes the `*.static.imljson` twins and skips the IML functions and the RPCs that call them, for an app where Make has not enabled IML functions (see below). The Hub refuses function code over 5000 characters, so the script pushes each function without its comments and indentation, and stops if one is still too long. Make names connections and webhooks itself, so the script matches them by label. If a label does not match, pin one with `--map submission_webhook=<hub name>`. The script never publishes, requests review, changes visibility or deletes anything. `app/metadata.imljson` and `app/parameters.imljson` are not synced, because the API has no app parameters section.
 
 ### Manual reference
 
@@ -180,7 +180,7 @@ Paste each file into corresponding Hub editor:
 | `modules/make_api_call/interface.imljson` | Universal module → Interface |
 | `modules/make_api_call/samples.imljson` | Universal module → Samples |
 
-Custom IML functions are disabled for a new Make app: the Developer Hub has no Functions tab and the `+` menu offers no "Create Function". Make enables them per app through a helpdesk ticket (https://www.make.com/en/ticket; tracked as formstep/formstep#207). Until then skip steps 2, 5, 7, 8 and 9 and paste the static twins instead:
+Custom IML functions are disabled for a new Make app: the Developer Hub has no Functions tab and the `+` menu offers no "Create Function". Make enables them per app through a helpdesk ticket (https://www.make.com/en/ticket). They are enabled for `formbase-f1d7bp` (formstep/formstep#207). On an app without them, skip steps 2, 5, 7, 8 and 9 and paste the static twins instead:
 
 - `modules/watch_public_link_submissions/interface.static.imljson` into Watch public link submissions → Interface
 - `modules/watch_requests/interface.static.imljson` into Watch requests → Interface
@@ -193,7 +193,9 @@ General settings come from each `metadata.imljson`. Set component connection/web
 
 Before saving connection Common data, replace `REPLACE_IN_MAKE_DEVELOPER_HUB` with same plaintext secret stored in `MAKE_OAUTH_CLIENT_SECRET`. Do not modify repository copy.
 
-OAuth redirect must remain `oauth.localRedirectUri`. For hosted Make this resolves to registered `https://www.make.com/oauth/cb/app` callback recommended for reviewed apps.
+The OAuth redirect is `https://eu1.make.com/oauth/cb/app`, written out in `communication.imljson`, not `{{oauth.localRedirectUri}}`. That variable resolves to `https://www.make.com/oauth/cb/app`, and Make's global callback answers "Resource not found" for this app: a custom app lives in the zone it was made in (eu1), and only that zone's callback knows the pending authorization. Formstep allows both URIs on `fboc_make`. When Make approves the app and it becomes available in every zone, switch both `redirect_uri` values back to `{{oauth.localRedirectUri}}`, which the review asks for.
+
+Get a request keeps its Form picker among the mappable parameters with `mappable: false`. As a static parameter of an action, Make ran its `listForms` RPC without the connection and the API answered 401.
 
 ## 3. Live smoke test
 

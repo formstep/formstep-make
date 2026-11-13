@@ -5,8 +5,9 @@
  *   npm run sync:hub                 dry run: read the Hub, compare, print the plan
  *   npm run sync:hub -- --apply      create missing components, push differing sections
  *
- * Flags: --static (default while formstep#207 is open) pushes the `*.static.imljson`
- * twins and skips IML functions and the RPCs that call them; --dynamic pushes both.
+ * Flags: --dynamic (default) pushes the IML functions and the function-backed files;
+ * --static pushes the `*.static.imljson` twins instead and skips IML functions and the
+ * RPCs that call them, for an app where Make has not enabled IML functions.
  * --map <repo name>=<hub name> pins a connection or webhook to a Hub component when
  * its label does not match.
  *
@@ -199,7 +200,7 @@ export function collectLocalApp(root, { mode }) {
     })
     for (const fn of orderFunctions(functions)) {
         if (mode === 'dynamic') components.push(fn)
-        else skipped.push({ kind: 'function', name: fn.name, reason: 'static mode: IML functions are locked until formstep#207' })
+        else skipped.push({ kind: 'function', name: fn.name, reason: 'static mode skips IML functions' })
     }
 
     for (const directory of listDirectories(root, 'rpcs')) {
@@ -268,9 +269,34 @@ export function withClientSecret(text, secret) {
     return JSON.stringify({ ...common, clientSecret: secret }, null, 4)
 }
 
-/** The body PUT for a section: the file as written, or common data with the secret substituted. */
+/** The Hub refuses IML function code longer than this ("Code is too long (max 5000 characters)"). */
+export const MAX_FUNCTION_CODE_LENGTH = 5000
+
+/**
+ * The IML function as the Hub stores it: the repository file without its leading
+ * doc comment, its whole-line `//` comments and its indentation, which keeps every
+ * function under the Hub's length limit while the repository keeps the comments.
+ * A trailing `//` after code is not removed, so a function must not have one.
+ */
+export function hubFunctionCode(source, file) {
+    const start = source.search(/^function /m)
+    if (start === -1) throw new Error(`${file} has no top-level function declaration`)
+    const code = source
+        .slice(start)
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line !== '' && !line.startsWith('//'))
+        .join('\n')
+    if (code.length > MAX_FUNCTION_CODE_LENGTH) {
+        throw new Error(`${file} is ${code.length} characters without comments; the Hub takes at most ${MAX_FUNCTION_CODE_LENGTH}`)
+    }
+    return code
+}
+
+/** The body PUT for a section: the file as written, function code compacted, or common data with the secret substituted. */
 export function sectionBody(root, section, secret) {
     const text = readText(root, section.file)
+    if (section.section === 'code') return hubFunctionCode(text, section.file)
     if (section.section !== 'common') return text
     if (!secret) throw new Error('Common data needs MAKE_OAUTH_CLIENT_SECRET')
     return withClientSecret(text, secret)
@@ -629,7 +655,7 @@ function sectionLabel(section) {
 
 function printPlan(plan, { mode, apply }) {
     const lines = []
-    const modeNote = mode === 'static' ? 'static mode, IML functions locked (formstep#207)' : 'dynamic mode'
+    const modeNote = mode === 'static' ? 'static mode, IML functions skipped' : 'dynamic mode'
     lines.push(`${APP_NAME} v${APP_VERSION} on ${new URL(API_BASE).host}, ${modeNote}${apply ? '' : ', dry run'}`)
 
     const creates = plan.entries.filter((entry) => entry.create)
@@ -738,8 +764,8 @@ const USAGE = `Usage: npm run sync:hub -- [--dry-run | --apply] [--static | --dy
 
   --dry-run   (default) read the Hub and print what would change
   --apply     create missing components and push differing sections
-  --static    (default) push *.static.imljson twins; skip IML functions and the RPCs calling them
-  --dynamic   push IML functions and the function-backed files
+  --dynamic   (default) push IML functions and the function-backed files
+  --static    push *.static.imljson twins; skip IML functions and the RPCs calling them
   --map       pin a repository connection or webhook to a Hub name, e.g. --map submission_webhook=formbase-f1d7bp2
 
 Reads MAKE_API_TOKEN (scopes sdk-apps:read, sdk-apps:write) and optional MAKE_OAUTH_CLIENT_SECRET
@@ -765,7 +791,7 @@ export function parseArgs(argv) {
     return {
         help: flags.has('--help') || flags.has('-h'),
         apply: flags.has('--apply'),
-        mode: flags.has('--dynamic') ? 'dynamic' : 'static',
+        mode: flags.has('--static') ? 'static' : 'dynamic',
         map
     }
 }
@@ -821,7 +847,7 @@ if (invokedDirectly) {
     main(process.argv.slice(2)).catch((error) => {
         console.error(`\n${error.message}`)
         if (error instanceof ApiError && error.apiPath.includes('/functions')) {
-            console.error('\nThe functions endpoint refused the call: the API does not bypass the Hub lock on IML functions (formstep#207). Run without --dynamic.')
+            console.error(`\nThe functions endpoint refused the call. The Hub takes at most ${MAX_FUNCTION_CODE_LENGTH} characters of code per function, and an app where Make has not enabled IML functions refuses them all: run with --static there.`)
         }
         process.exitCode = 1
     })

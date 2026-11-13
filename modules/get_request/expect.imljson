@@ -1,5 +1,16 @@
 [
     {
+        "name": "formId",
+        "type": "select",
+        "label": "Form",
+        "required": true,
+        "mappable": false,
+        "help": "The form the request belongs to. It shapes the mapping panel, so each answer is listed under its field key; the request itself is fetched by Request ID.",
+        "options": {
+            "store": "rpc://listForms"
+        }
+    },
+    {
         "name": "requestId",
         "type": "text",
         "label": "Request ID",

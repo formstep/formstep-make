@@ -1,7 +1,7 @@
 {
     "name": "formbase",
     "label": "Formstep",
-    "description": "Build forms and route submissions to your stack.",
+    "description": "Collect and verify information from people: send a request, get the answers back in your scenario.",
     "version": 2,
     "language": "en",
     "countries": null,

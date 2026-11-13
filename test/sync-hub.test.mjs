@@ -16,6 +16,8 @@ import {
     componentPath,
     createBody,
     danglingReferences,
+    hubFunctionCode,
+    MAX_FUNCTION_CODE_LENGTH,
     parseArgs,
     parseEnvFile,
     readHubLists,
@@ -146,6 +148,20 @@ test('JSON sections compare equal across whitespace, comments, trailing commas a
     assert.equal(sectionsEqual('javascript', 'function a() {}', 'function b() {}'), false)
 })
 
+test('function code reaches the Hub without comments or indentation, under its length limit', () => {
+    assert.equal(
+        hubFunctionCode('/**\n * Doc.\n */\nfunction a(x) {\n    // why\n\n    return x\n}\n', 'functions/a.js'),
+        'function a(x) {\nreturn x\n}'
+    )
+    assert.throws(() => hubFunctionCode('const a = 1\n', 'functions/a.js'), /no top-level function/)
+    assert.throws(() => hubFunctionCode(`function a() {\n${'x'.repeat(MAX_FUNCTION_CODE_LENGTH)}\n}`, 'functions/a.js'), /at most 5000/)
+    for (const file of fs.readdirSync(path.join(ROOT, 'functions'))) {
+        const code = hubFunctionCode(read(`functions/${file}`), file)
+        assert.doesNotMatch(code, /\/\//, `${file} keeps a trailing comment the Hub copy would carry`)
+        assert.doesNotThrow(() => new Function(`${code}\nreturn ${path.basename(file, '.js')}`))
+    }
+})
+
 test('common data takes the client secret in place of the placeholder', () => {
     const text = read('connections/formbase/common.imljson')
     const pushed = JSON.parse(withClientSecret(text, 's3cret"with\\quotes'))
@@ -233,8 +249,8 @@ test('only reads, creates, patches and section writes are allowed', () => {
     }
 })
 
-test('arguments default to a static dry run', () => {
-    assert.deepEqual(parseArgs([]), { help: false, apply: false, mode: 'static', map: {} })
+test('arguments default to a dynamic dry run', () => {
+    assert.deepEqual(parseArgs([]), { help: false, apply: false, mode: 'dynamic', map: {} })
     assert.deepEqual(parseArgs(['--apply', '--dynamic', '--map', 'submission_webhook=formbase-f1d7bp2']), {
         help: false,
         apply: true,

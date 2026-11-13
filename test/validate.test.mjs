@@ -146,7 +146,9 @@ test('OAuth connection implements PKCE, confidential client auth, rotation, and 
     assert.deepEqual(scope, ['api:read', 'api:write', 'offline_access'])
 
     assert.equal(communication.authorize.url, 'https://api.formstep.io/oauth/authorize')
-    assert.equal(communication.authorize.qs.redirect_uri, '{{oauth.localRedirectUri}}')
+    // www.make.com (oauth.localRedirectUri) cannot find an authorization for an app that lives in eu1 only.
+    assert.equal(communication.authorize.qs.redirect_uri, 'https://eu1.make.com/oauth/cb/app')
+    assert.equal(communication.token.body.redirect_uri, communication.authorize.qs.redirect_uri)
     assert.equal(communication.authorize.qs.code_challenge_method, 'S256')
     assert.match(communication.authorize.qs.code_challenge, /sha256\(temp\.codeVerifier/)
     assert.match(communication.authorize.qs.code_challenge, /replace\(replace\(replace/)
@@ -592,12 +594,14 @@ test('Get a request reads by request id and lists answers under the form\'s fiel
     assert.equal(api.body.method, 'requests.get')
     assert.deepEqual(api.body.params, { requestId: '{{parameters.requestId}}' })
     assert.equal(api.response.output, '{{body.data}}')
-    // The form is a static parameter: it only shapes the mapping panel, the id fetches the request.
-    assert.deepEqual(parameters.map((field) => field.name), ['formId'])
-    assert.equal(parameters[0].mappable, false)
-    assert.equal(parameters[0].options.store, 'rpc://listForms')
-    assert.deepEqual(expect.map((field) => field.name), ['requestId'])
-    assert.equal(expect[0].required, true)
+    // The form only shapes the mapping panel; the id fetches the request. It is an unmappable
+    // mappable parameter, not a static one: Make runs a static parameter's RPC of an action
+    // without the connection, so listForms answered 401 there.
+    assert.deepEqual(parameters, [])
+    assert.deepEqual(expect.map((field) => field.name), ['formId', 'requestId'])
+    assert.equal(expect[0].mappable, false)
+    assert.equal(expect[0].options.store, 'rpc://listForms')
+    assert.equal(expect[1].required, true)
 
     assert.equal(readJson('modules/get_request/interface.imljson'), 'rpc://getRequestInterface')
     assert.equal(rpcApi.body.method, 'fields.list')
