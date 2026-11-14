@@ -1,7 +1,7 @@
 {
     "name": "watchRequests",
     "label": "Watch requests",
-    "description": "Triggers when a request is completed, expires or is canceled. Event type is request.completed, request.expired or request.canceled. data.request carries request ID, external ID, status, outcome, recipient and metadata; a completed request also delivers data.answers keyed by field key and readable text in data.display.",
+    "description": "Triggers when a request is completed, expired or canceled.",
     "type": "instant_trigger",
     "connection": "formbase",
     "webhook": "request_webhook"

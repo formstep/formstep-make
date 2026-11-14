@@ -1,7 +1,7 @@
 {
     "name": "getRequest",
     "label": "Get a request",
-    "description": "Returns one request: status, outcome, recipient, request link and timeline, plus the answers keyed by field key once the recipient has completed it. Answers are null until then.",
+    "description": "Returns a request with its status, answers and timeline.",
     "type": "action",
     "actionType": "read",
     "connection": "formbase"

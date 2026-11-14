@@ -1,16 +1,18 @@
 [
     {
         "name": "requestId",
-        "type": "text",
+        "type": "select",
         "label": "Request ID",
         "required": true,
-        "help": "The `id` returned by Create a request, Search requests or a Watch requests event."
+        "mode": "edit",
+        "help": "Map the `id` from Create a request, Search requests or Watch requests, or pick one of the workspace's pending requests. Only a pending request can be canceled.",
+        "options": "rpc://listRequests?status=pending"
     },
     {
         "name": "reason",
         "type": "text",
         "label": "Reason",
         "required": false,
-        "help": "Why the request is canceled. Stored on the request and carried by the request.canceled event."
+        "help": "Why the request is canceled. Stored on the request and sent with the Request canceled event of Watch requests."
     }
 ]

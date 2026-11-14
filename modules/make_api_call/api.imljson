@@ -7,7 +7,9 @@
     },
     "response": {
         "output": {
-            "data": "{{body.data}}"
+            "body": "{{body}}",
+            "headers": "{{headers}}",
+            "statusCode": "{{statusCode}}"
         }
     }
 }

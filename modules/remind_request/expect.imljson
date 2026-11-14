@@ -1,9 +1,11 @@
 [
     {
         "name": "requestId",
-        "type": "text",
+        "type": "select",
         "label": "Request ID",
         "required": true,
-        "help": "The `id` returned by Create a request, Search requests or a Watch requests event."
+        "mode": "edit",
+        "help": "Map the `id` from Create a request, Search requests or Watch requests, or pick one of the workspace's pending requests. The request needs a recipient email, and the workspace plan needs reminders. Wait at least 10 minutes between reminders; a request gets at most 8 in total.",
+        "options": "rpc://listRequests?status=pending"
     }
 ]

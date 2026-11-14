@@ -4,7 +4,7 @@
         "type": "text",
         "label": "Method",
         "required": true,
-        "help": "Formstep API method name, for example `me.get`, `forms.get`, or `submissions.list`. See https://docs.formstep.io/developers/rest-api."
+        "help": "Formstep API method name, for example `me.get`, `forms.get` or `submissions.list`. See https://formstep.io/docs/developers/rest-api/."
     },
     {
         "name": "params",

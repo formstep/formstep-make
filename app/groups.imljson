@@ -1,0 +1,26 @@
+[
+    {
+        "label": "Triggers",
+        "modules": [
+            "watchPublicLinkSubmissions",
+            "watchRequests",
+            "watchSubmissions"
+        ]
+    },
+    {
+        "label": "Requests",
+        "modules": [
+            "searchRequests",
+            "getRequest",
+            "createRequest",
+            "cancelRequest",
+            "remindRequest"
+        ]
+    },
+    {
+        "label": "Other",
+        "modules": [
+            "makeApiCall"
+        ]
+    }
+]

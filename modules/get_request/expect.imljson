@@ -1,20 +1,22 @@
 [
     {
+        "name": "requestId",
+        "type": "select",
+        "label": "Request ID",
+        "required": true,
+        "mode": "edit",
+        "help": "Map the `id` from Create a request, Search requests or Watch requests, or pick one of the workspace's latest requests. Answers stay empty until the recipient completes the request.",
+        "options": "rpc://listRequests"
+    },
+    {
         "name": "formId",
         "type": "select",
         "label": "Form",
-        "required": true,
+        "required": false,
         "mappable": false,
-        "help": "The form the request belongs to. It shapes the mapping panel, so each answer is listed under its field key; the request itself is fetched by Request ID.",
+        "help": "Optional. Pick the request's form to list each answer under its field key in the output. Leave it empty to get requests of different forms in one scenario.",
         "options": {
             "store": "rpc://listForms"
         }
-    },
-    {
-        "name": "requestId",
-        "type": "text",
-        "label": "Request ID",
-        "required": true,
-        "help": "The `id` returned by Create a request, Search requests or a Watch requests event."
     }
 ]

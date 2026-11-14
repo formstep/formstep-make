@@ -10,7 +10,7 @@ The app follows the Formstep [n8n](https://github.com/formstep/n8n-nodes-formste
 
 ### Connection
 
-OAuth 2.0 authorization code with mandatory PKCE S256 and the scopes `api:read api:write offline_access`. Access and refresh tokens rotate. One connection covers one workspace, and the form picker lists that workspace's forms with cursor pagination. The user picks their Make zone when they create the connection; see [OAuth redirect and the Make zone](#oauth-redirect-and-the-make-zone).
+OAuth 2.0 authorization code with mandatory PKCE S256 and the scopes `api:read api:write offline_access`. Access and refresh tokens rotate. One connection covers one workspace, and the form picker lists that workspace's forms with cursor pagination. The connection has no parameters: the user signs in and picks the workspace on Formstep's consent page. See [OAuth redirect](#oauth-redirect).
 
 ### Triggers
 
@@ -41,13 +41,17 @@ Test requests never reach it. A completed request fires Watch requests alone, so
 | Module | API method | What it does |
 | --- | --- | --- |
 | Create a request | `requests.create` | Takes the form, recipient, delivery, language, reminders, expiry, external ID, metadata and test mode. Returns the request summary with the request link (`url`) |
-| Get a request | `requests.get` | Returns the request with `answers` and `display` per field key, plus the timeline |
+| Get a request | `requests.get` | Returns the request with `answers` and `display`, plus the timeline. Picking the optional Form lists the answers per field key |
 | Cancel a request | `requests.cancel` | Withdraws a pending request, with an optional reason |
-| Remind a request | `requests.remind` | Emails the recipient a reminder now |
+| Send a request reminder (`remindRequest`) | `requests.remind` | Emails the recipient a reminder now |
 | Search requests | `requests.list` | Lists a form's requests by status and external ID, following `nextCursor` up to the limit |
-| Make an API call | any | Universal module for the other Formstep JSON-RPC methods |
+| Make an API call | any | Universal module for the other Formstep JSON-RPC methods. Returns `body` (the `{ ok, data }` envelope), `headers` and `statusCode` |
 
 In Create a request, picking a form loads the prefill inputs, the hidden-field context inputs and the read-only picker, one per field key, from `fields.list` through the nested `getRequestFields` RPC. The external ID is also sent as `idempotencyKey`, so a scenario that runs again reuses the request.
+
+Request ID in Get a request, Cancel a request and Send a request reminder is a select that opens in mapping mode (`"mode": "edit"`). Switched to the list, it shows the workspace's latest requests from the `listRequests` RPC, up to 300: every status in Get a request, pending ones in the other two.
+
+The modules are grouped in `app/groups.imljson`: Triggers, Requests, and Other with the universal module alone. The hidden `watchSubmissions` module, which `watchPublicLinkSubmissions` replaced, exists only in the Hub and is listed under Triggers, because a published module cannot be deleted.
 
 ### Data shapes
 
@@ -63,7 +67,13 @@ Output interfaces are built from `fields.list`, so every answer maps under its o
 
 Watch requests and Get a request reuse the `buildSubmissionInterface` function through the `iml` namespace, so a field key maps under the same pill in every module. Sample payloads come from `submissions.sample` and `requests.sample`.
 
-The API returns a request's times as epoch milliseconds. Create, Get, Cancel and Remind a request and Search requests pass their output through the `requestDates` function, which turns the request's top-level `...At` fields and `timeline[].at` into ISO 8601 strings, so Make shows and compares them as dates. Answers, display text, prefill, context and metadata stay as they are, because a field key may end in `At` and hold a number that is not a time. Webhook events already carry ISO strings.
+Make shows a value as a date only when the module returns a date; typing a string `date` in the interface does not convert it. Three functions parse the times:
+
+- `requestDates` for Create a request, Get a request, Cancel a request, Send a request reminder and Search requests. The API returns a request's times as epoch milliseconds, and the function turns the request's top-level `...At` fields and `timeline[].at` into dates. Display text, prefill, context and metadata stay as they are, because a field key may end in `At` and hold a number that is not a time.
+- `eventDates` for both triggers. A webhook event carries ISO 8601 strings, and the function parses the envelope's `createdAt`, the request's `createdAt`, `completedAt`, `expiredAt` and `canceledAt`, and the submission's `submittedAt` and `updatedAt`.
+- `answerDates`, called by the other two, for the booking and payment times inside `answers`. Those sit under field keys only the form knows, so it goes by shape: an object answer gets its `start`, `end`, `paidAt`, `refundedAt` and `disputedAt` parsed when the value is a full ISO date-time.
+
+A date question answers `YYYY-MM-DD` and a time question `HH:MM`. Both stay text and are typed `text` in the interface, as Make's review asks.
 
 ## Design notes
 
@@ -71,28 +81,36 @@ The API returns a request's times as epoch milliseconds. Create, Get, Cancel and
 
 A Make custom-app webhook sees only the parsed `body`, `headers` and `query`, never the raw bytes, and it holds no per-subscription secret when a delivery arrives. `X-Formstep-Signature` therefore cannot be verified here, for submissions or for requests. The unguessable `hook.make.com` URL over HTTPS protects deliveries. Zapier and n8n verify signatures because their runtimes expose the raw body.
 
-### OAuth redirect and the Make zone
+### OAuth redirect
 
-Both `redirect_uri` values are `https://{{ifempty(parameters.zone, 'eu1')}}.make.com/oauth/cb/app`, built from the connection's Make zone parameter. Make's own variable, `{{oauth.localRedirectUri}}`, resolves to `https://www.make.com/oauth/cb/app`, and that global callback answers "Resource not found" for this app: until Make approves a custom app, a pending authorization is known only to the zone the user's organization is in.
+Both `redirect_uri` values are `{{oauth.localRedirectUri}}`, which Make's review requires. It resolves to `https://www.make.com/oauth/cb/app` until Make approves the app and to `https://www.make.com/oauth/cb/formbase-f1d7bp` after. Formstep allows both on `fboc_make`, plus the four zone callbacks (`https://{eu1,eu2,us1,us2}.make.com/oauth/cb/app`) that connections used before.
 
-The user picks the zone from their Make address: eu1, eu2, us1 or us2. A connection made before the parameter existed has no zone and uses eu1, where it was made. Formstep allows all five URIs on `fboc_make`.
+Until version 3 the connection had a Make zone parameter and built the callback from it, because `www.make.com/oauth/cb/app` answered "Resource not found" for this unapproved app in November 2026. If a new connection fails that way again before approval, report it to Make; do not bring the parameter back.
 
-When Make approves the app, switch both values back to `{{oauth.localRedirectUri}}`, which the review asks for, and remove the parameter.
+### Errors
+
+The Base turns every error into `[<status>/<code>] <message>` from the API's error envelope, with a fallback for a response that has none, such as a gateway error page. 402 (`UPGRADE_REQUIRED`: the plan lacks a feature the call needs) and 403 (`FORBIDDEN`: an id outside the connection's workspace, or a method that needs an API key) are `DataError`. Both are about one call, and `InvalidConfigurationError` would switch the whole scenario off.
+
+### Pagination
+
+`pagination.body` carries only `params.cursor`. Make's review says the pagination body is merged into the original request; Make's documentation says it replaces the body. If it replaced it, page two would lose `method`. Check this live with more than 100 forms or requests before relying on it (smoke test step 10).
 
 ### Get a request keeps its form picker among the mappable parameters
 
 The Form picker of Get a request is a mappable parameter with `mappable: false`. As a static parameter of an action, Make ran its `listForms` RPC without the connection and the API answered 401.
 
+The Form is optional. `requests.get` needs the request ID alone, and the form only shapes the output. With no form, the `getRequestInterface` RPC skips `fields.list` (`condition`) and returns the request summary with empty `answers` and `display` collections, so one scenario can fetch requests of different forms.
+
 ## Repository map
 
 ```text
 formstep-make/
-├── app/                  # Base, app parameters and the readme Make shows
+├── app/                  # Base, module groups, app parameters and the readme Make shows
 ├── connections/formbase/ # OAuth connection: communication, common data, scopes, parameters
-├── functions/            # IML functions: interfaces and inputs built from fields.list, request times as dates
+├── functions/            # IML functions: interfaces and inputs built from fields.list, request and event times as dates
 ├── modules/              # Two instant triggers, four request actions, the search, the universal module
 ├── webhooks/             # Attached dedicated webhooks: submission_webhook, request_webhook
-├── rpcs/                 # Form options, sample payloads, output interfaces, Create a request inputs
+├── rpcs/                 # Form and request options, sample payloads, output interfaces, Create a request inputs
 ├── scripts/sync-hub.mjs  # Pushes the repository to the Make Developer Hub (npm run sync:hub)
 └── test/                 # Contract tests
 ```
@@ -105,7 +123,7 @@ npm ci
 npm test
 ```
 
-The tests check JSON syntax, OAuth, PKCE, refresh rotation, sanitization, API envelopes, pagination, both webhook lifecycles, every module's request body and output interface, dynamic samples, and that every `rpc://` and function reference resolves. They also run the IML functions: the interfaces and inputs built from a field list, the static fallbacks that must equal them, and the dates `requestDates` returns. They do not run Make's hosted IML runtime, so finish with the live smoke test below.
+The tests check JSON syntax, OAuth, PKCE, refresh rotation, sanitization, API envelopes, pagination, both webhook lifecycles, every module's request body and output interface, dynamic samples, and that every `rpc://` and function reference resolves. They also run the IML functions: the interfaces and inputs built from a field list, the static fallbacks that must equal them, and the dates `requestDates`, `eventDates` and `answerDates` return. They do not run Make's hosted IML runtime, so finish with the live smoke test below.
 
 ## 1. Deploy Formstep OAuth support
 
@@ -128,7 +146,7 @@ Seed the production client:
 
 ```bash
 pnpm convex run --prod internal/oauthClients:seedMakeOAuthClient \
-  '{"redirectUris":["https://www.make.com/oauth/cb/app","https://eu1.make.com/oauth/cb/app","https://eu2.make.com/oauth/cb/app","https://us1.make.com/oauth/cb/app","https://us2.make.com/oauth/cb/app"]}'
+  '{"redirectUris":["https://www.make.com/oauth/cb/app","https://www.make.com/oauth/cb/formbase-f1d7bp","https://eu1.make.com/oauth/cb/app","https://eu2.make.com/oauth/cb/app","https://us1.make.com/oauth/cb/app","https://us2.make.com/oauth/cb/app"]}'
 ```
 
 Expected result:
@@ -164,11 +182,11 @@ The script never publishes, requests review, changes visibility or deletes anyth
 Create a private app named `formbase`, then create the components in this order:
 
 1. OAuth 2.0 connection `formbase`
-2. IML functions `buildSubmissionInterface`, `buildRequestInterface`, `buildRequestEventInterface`, `buildRequestFields`, `requestDates`. `buildRequestInterface` and `buildRequestEventInterface` call `iml.buildSubmissionInterface`, so add that one first
-3. RPCs `listForms`, `getSampleSubmission`, `getSubmissionInterface`, `getSampleRequest`, `getRequestEventInterface`, `getRequestInterface`, `getRequestFields`
+2. IML functions `buildSubmissionInterface`, `buildRequestInterface`, `buildRequestEventInterface`, `buildRequestFields`, `answerDates`, `eventDates`, `requestDates`. `buildRequestInterface` and `buildRequestEventInterface` call `iml.buildSubmissionInterface`, and `eventDates` and `requestDates` call `iml.answerDates`, so add those two first
+3. RPCs `listForms`, `listRequests`, `getSampleSubmission`, `getSubmissionInterface`, `getSampleRequest`, `getRequestEventInterface`, `getRequestInterface`, `getRequestFields`
 4. Attached dedicated web webhooks `submission_webhook` and `request_webhook`
 5. Instant triggers `watchPublicLinkSubmissions` and `watchRequests`
-6. Actions `createRequest` (create), `getRequest` (read), `cancelRequest` (update), `remindRequest` (update)
+6. Actions `createRequest` (create), `getRequest` (read), `cancelRequest` (update), `remindRequest` (update, labelled Send a request reminder)
 7. Search `searchRequests`
 8. Universal module `makeApiCall`
 
@@ -176,7 +194,7 @@ Paste each file into the Hub editor of its component:
 
 | Component | File → Hub field |
 | --- | --- |
-| App (`app/`) | `base.imljson` → Base, `parameters.imljson` → Parameters, `readme.md` → Readme |
+| App (`app/`) | `base.imljson` → Base, `groups.imljson` → Groups, `parameters.imljson` → Parameters, `readme.md` → Readme |
 | Connection (`connections/formbase/`) | `common.imljson` → Common data, `scope.imljson` → Default scope, `parameters.imljson` → Parameters, `communication.imljson` → Communication |
 | IML functions (`functions/*.js`) | Functions (IML), one function per file |
 | RPCs (`rpcs/*/`) | `api.imljson` → Communication |
@@ -199,33 +217,33 @@ On an app without them, skip the functions and the four RPCs that call them (`ge
 - `modules/watch_requests/interface.static.imljson` into Watch requests → Interface
 - `modules/get_request/interface.static.imljson` into Get a request → Interface
 - `modules/create_request/expect.static.imljson` into Create a request → Mappable parameters
-- `api.static.imljson` into Communication of Create, Get, Cancel and Remind a request and Search requests
+- `api.static.imljson` into Communication of Create a request, Get a request, Cancel a request, Send a request reminder and Search requests, and of both webhooks
 
 Each interface and input twin is what its function returns for an unpublished form, with the per-key parts typed `any`. `data.answers` and `data.display` still arrive and map by typing `{{1.data.answers.<field key>}}`. Create a request takes `prefill` and `context` as JSON objects and `readonly` as a list of field keys, where the dynamic file has one input per field. The test suite keeps each of these twins equal to its function.
 
-The `api.static.imljson` twins return the API response without `requestDates`, so a request's times arrive as epoch milliseconds.
+The `api.static.imljson` twins return the API response and the webhook body as they arrive, so a request's times are epoch milliseconds and an event's times are text.
 
-Once functions are enabled, add the five functions, create the RPCs, and switch each module back to the dynamic file.
+Once functions are enabled, add the seven functions, create the RPCs, and switch each module back to the dynamic file.
 
 ## 3. Live smoke test
 
 Create a test scenario in Make:
 
 1. Add **Formstep → Watch public link submissions**.
-2. Create a connection. Pick the Make zone of the organization, sign in, select a workspace and approve the consent. The connection label shows the workspace name.
-3. Select a form and `Submission created`. Use **Make an API call** with `webhooks.list` to confirm the registered subscription carries no `idleWindow`. The attach body sends it only for abandoned submissions.
+2. Create a connection. Sign in, select a workspace and approve the consent. Make returns to `www.make.com/oauth/cb/app`; a "Resource not found" page there is Make's to fix (see [OAuth redirect](#oauth-redirect)). The connection label shows the workspace name.
+3. Select a form and `Submission created`. Use **Make an API call** with `webhooks.list` to confirm the registered subscription, under `body.data.items`, carries no `idleWindow`. The attach body sends it only for abandoned submissions.
 4. Open the module's output mapping panel and confirm every question of the form is listed under **Answers** and **Answers (display)** by its field key. The list comes from `getSubmissionInterface`. A form that is not published has no field list yet (`fields.list` answers `published: false`), so the module shows the envelope alone until the form is published.
 5. Click **Run once**, then submit the form.
-6. Confirm one bundle with `id`, `type`, `createdAt`, `data.form`, `data.submission` (PDF and language), `data.answers` and `data.display`. The type is `submission.completed`. `data.answers` values keep their stored type, and `data.display` is stable text under the same keys. Then edit the submission you just sent (the form must allow editing after submit) and confirm this scenario does not run. A trigger set to `Submission updated` receives the edit as `submission.updated`.
+6. Confirm one bundle with `id`, `type`, `createdAt` (shown as a date, like `data.submission.submittedAt`), `data.form`, `data.submission` (PDF and language), `data.answers` and `data.display`. The type is `submission.completed`. `data.answers` values keep their stored type, and `data.display` is stable text under the same keys. Then edit the submission you just sent (the form must allow editing after submit) and confirm this scenario does not run. A trigger set to `Submission updated` receives the edit as `submission.updated`.
 7. Delete the trigger's webhook in Make. Use **Make an API call** with `webhooks.list` and the `formId` to confirm the subscription is gone. Deleting the scenario alone leaves the webhook and its subscription.
 8. Create a webhook on `Submission abandoned`, select an idle window, save a partial response and leave it unchanged past that window. Confirm the bundle has the type `submission.abandoned`. The backend sweeps hourly, so delivery can come up to about one hour after the threshold.
 9. Run an error scenario with an unknown API method and confirm a readable `METHOD_NOT_FOUND` error.
-10. If a review is planned, test the form picker against a workspace with more than 100 forms and keep the execution logs that show pagination.
-11. Add **Create a request** with the same form. Picking the form lists one input per prefillable field under **Prefill**, one per hidden field under **Context**, and the **Read-only fields** picker. On an app pushed with `--static`, `prefill` and `context` are JSON inputs. Set an external ID, run once, and confirm the bundle carries `id`, `url` and `deduplicated: false`, and that `createdAt` and `expiresAt` show as dates. Run again with the same inputs and confirm `deduplicated: true` and the same `url`.
+10. Test the form picker against a workspace with more than 100 forms, or Search requests with a limit above 100 on a form with more than 100 requests, and confirm the second page loads (see [Pagination](#pagination)). Keep the execution logs for the review.
+11. Add **Create a request** with the same form. Picking the form lists one input per prefillable field under **Prefill**, one per hidden field under **Context**, and the **Read-only fields** picker. On an app pushed with `--static`, `prefill` and `context` are JSON inputs. Set an external ID, run once, and confirm the bundle carries `id`, `url` and `deduplicated: false`, and that `createdAt` and `expiresAt` show as dates. If they show as text, replace `new Date(...)` in the three date functions with `iml.parseDate(...)`. Run again with the same inputs and confirm `deduplicated: true` and the same `url`.
 12. Add **Watch requests** on the same form with `Request completed`, run once, and complete the request from step 11 through its `url`. Confirm one bundle with `type: request.completed`, `data.request.status: completed`, `data.answers` and `data.display`. Confirm the Watch public link submissions scenario from step 1 did not run: a completed request fires Watch requests alone.
 13. Create a second request, add **Cancel a request** with its `id` and a reason, and confirm the summary comes back `canceled` with `cancelReason`. With Watch requests on `Request canceled`, confirm one `request.canceled` bundle with only `data.request`.
-14. Run **Search requests** on the form with the status `canceled`, and **Get a request** with the completed request's `id`. The mapping panel lists `answers` and `display` per field key, and the bundle carries `outcome`, `answers`, `display` and `timeline`.
-15. Run **Remind a request** on a pending request that has a recipient email and is not a test request, and confirm `remindersSent` increments. A second call within 10 minutes fails with `[409/CONFLICT] A reminder for this request went out less than ten minutes ago. Try again shortly.` Make shows the API's error code and message. The reason, `REMINDER_TOO_SOON`, is in the response's `error.details.reason`.
+14. Run **Search requests** on the form with the status `canceled`, and **Get a request** with the completed request's `id` and its form. Switch Request ID's **Map** toggle off once and confirm the list shows the workspace's requests. Run Get a request once more with Form left empty and a request of another form: the module must open and run without calling `fields.list`, and return the request with `answers` and `display`. The mapping panel lists `answers` and `display` per field key, and the bundle carries `outcome`, `answers`, `display` and `timeline`.
+15. Run **Send a request reminder** on a pending request that has a recipient email and is not a test request, and confirm `remindersSent` increments. A second call within 10 minutes fails with `[409/CONFLICT] A reminder for this request went out less than ten minutes ago. Try again shortly.` Make shows the API's error code and message. The reason, `REMINDER_TOO_SOON`, is in the response's `error.details.reason`.
 
 ## 4. Publish
 

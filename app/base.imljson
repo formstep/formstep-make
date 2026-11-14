@@ -10,37 +10,37 @@
         "error": {
             "400": {
                 "type": "DataError",
-                "message": "[{{statusCode}}/{{body.error.code}}] {{body.error.message}}"
+                "message": "[{{statusCode}}/{{ifempty(body.error.code, 'UNEXPECTED_RESPONSE')}}] {{ifempty(body.error.message, 'Formstep did not return an error message.')}}"
             },
             "401": {
                 "type": "InvalidAccessTokenError",
-                "message": "[{{statusCode}}/{{body.error.code}}] {{body.error.message}}"
+                "message": "[{{statusCode}}/{{ifempty(body.error.code, 'UNEXPECTED_RESPONSE')}}] {{ifempty(body.error.message, 'Formstep did not return an error message.')}}"
             },
             "402": {
-                "type": "InvalidConfigurationError",
-                "message": "[{{statusCode}}/{{body.error.code}}] {{body.error.message}}"
+                "type": "DataError",
+                "message": "[{{statusCode}}/{{ifempty(body.error.code, 'UNEXPECTED_RESPONSE')}}] {{ifempty(body.error.message, 'Formstep did not return an error message.')}}"
             },
             "403": {
-                "type": "InvalidConfigurationError",
-                "message": "[{{statusCode}}/{{body.error.code}}] {{body.error.message}}"
+                "type": "DataError",
+                "message": "[{{statusCode}}/{{ifempty(body.error.code, 'UNEXPECTED_RESPONSE')}}] {{ifempty(body.error.message, 'Formstep did not return an error message.')}}"
             },
             "404": {
                 "type": "DataError",
-                "message": "[{{statusCode}}/{{body.error.code}}] {{body.error.message}}"
+                "message": "[{{statusCode}}/{{ifempty(body.error.code, 'UNEXPECTED_RESPONSE')}}] {{ifempty(body.error.message, 'Formstep did not return an error message.')}}"
             },
             "409": {
                 "type": "DuplicateDataError",
-                "message": "[{{statusCode}}/{{body.error.code}}] {{body.error.message}}"
+                "message": "[{{statusCode}}/{{ifempty(body.error.code, 'UNEXPECTED_RESPONSE')}}] {{ifempty(body.error.message, 'Formstep did not return an error message.')}}"
             },
             "429": {
                 "type": "RateLimitError",
-                "message": "[{{statusCode}}/{{body.error.code}}] {{body.error.message}}"
+                "message": "[{{statusCode}}/{{ifempty(body.error.code, 'UNEXPECTED_RESPONSE')}}] {{ifempty(body.error.message, 'Formstep did not return an error message.')}}"
             },
             "500": {
                 "type": "ConnectionError",
-                "message": "[{{statusCode}}/{{body.error.code}}] {{body.error.message}}"
+                "message": "[{{statusCode}}/{{ifempty(body.error.code, 'UNEXPECTED_RESPONSE')}}] {{ifempty(body.error.message, 'Formstep did not return an error message.')}}"
             },
-            "message": "[{{statusCode}}/{{body.error.code}}] {{body.error.message}}"
+            "message": "[{{statusCode}}/{{ifempty(body.error.code, 'UNEXPECTED_RESPONSE')}}] {{ifempty(body.error.message, 'Formstep did not return an error message.')}}"
         }
     },
     "log": {

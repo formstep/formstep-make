@@ -1,0 +1,28 @@
+{
+    "url": "/api/v1",
+    "method": "POST",
+    "body": {
+        "method": "requests.list",
+        "params": {
+            "workspaceId": "{{connection.workspaceId}}",
+            "status": "{{parameters.status}}",
+            "limit": 100
+        }
+    },
+    "response": {
+        "limit": 300,
+        "iterate": "{{body.data.items}}",
+        "output": {
+            "label": "{{ifempty(item.recipient.email, item.id)}} - {{item.formName}} ({{item.status}})",
+            "value": "{{item.id}}"
+        }
+    },
+    "pagination": {
+        "condition": "{{body.data.hasMore == true && body.data.nextCursor != null}}",
+        "body": {
+            "params": {
+                "cursor": "{{body.data.nextCursor}}"
+            }
+        }
+    }
+}

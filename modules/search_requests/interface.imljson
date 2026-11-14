@@ -27,6 +27,17 @@
         "label": "Form ID"
     },
     {
+        "name": "formName",
+        "type": "text",
+        "label": "Form name"
+    },
+    {
+        "name": "formOrigin",
+        "type": "text",
+        "label": "Form origin",
+        "help": "inline when the request built its own form, otherwise empty."
+    },
+    {
         "name": "formSnapshotId",
         "type": "text",
         "label": "Published version ID"

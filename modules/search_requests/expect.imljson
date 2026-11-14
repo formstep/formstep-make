@@ -5,7 +5,7 @@
         "label": "Form",
         "required": true,
         "mappable": false,
-        "help": "The form whose requests to list.",
+        "help": "The form whose requests to list. The results carry no answers; use Get a request for those.",
         "options": {
             "store": "rpc://listForms"
         }
@@ -55,7 +55,7 @@
         "type": "uinteger",
         "label": "Limit",
         "required": false,
-        "default": 25,
-        "help": "Maximum number of requests to return."
+        "default": 10,
+        "help": "Maximum number of results to return and work with during one execution cycle."
     }
 ]

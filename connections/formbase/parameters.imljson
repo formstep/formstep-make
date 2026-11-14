@@ -1,16 +1,1 @@
-[
-    {
-        "name": "zone",
-        "type": "select",
-        "label": "Make zone",
-        "required": true,
-        "default": "eu1",
-        "help": "The zone of your Make organization: the start of its address, for example eu1 in eu1.make.com. Make finishes the sign-in in this zone.",
-        "options": [
-            { "label": "EU1 (eu1.make.com)", "value": "eu1" },
-            { "label": "EU2 (eu2.make.com)", "value": "eu2" },
-            { "label": "US1 (us1.make.com)", "value": "us1" },
-            { "label": "US2 (us2.make.com)", "value": "us2" }
-        ]
-    }
-]
+[]

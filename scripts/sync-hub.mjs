@@ -41,6 +41,7 @@ export const CONTENT_TYPES = {
 export const SECTION_FILES = {
     app: [
         { file: 'base.imljson', section: 'base', format: 'jsonc' },
+        { file: 'groups.imljson', section: 'groups', format: 'jsonc' },
         { file: 'readme.md', section: 'readme', format: 'markdown' }
     ],
     connection: [
@@ -414,7 +415,7 @@ export function sectionPath(kind, remoteName, section) {
     return `${componentPath(kind, remoteName)}/${section}`
 }
 
-const PUT_SECTIONS = ['base', 'readme', 'api', 'parameters', 'expect', 'interface', 'samples', 'attach', 'detach', 'scope', 'common', 'code']
+const PUT_SECTIONS = ['base', 'groups', 'readme', 'api', 'parameters', 'expect', 'interface', 'samples', 'attach', 'detach', 'scope', 'common', 'code']
 const ALLOWED_WRITES = {
     // Create Connection / Webhook / RPC / Module / Function, and nothing else under POST
     // (publish, review, visibility, deprecation, clone, commit, test and uninstall are all POST).

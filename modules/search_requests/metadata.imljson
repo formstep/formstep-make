@@ -1,7 +1,7 @@
 {
     "name": "searchRequests",
     "label": "Search requests",
-    "description": "Lists the requests of a form, newest first, optionally narrowed to one status or one external ID. Returns request summaries without answers; use Get a request for the answers.",
+    "description": "Searches for the requests of a form by status or external ID.",
     "type": "search",
     "connection": "formbase"
 }

@@ -19,13 +19,7 @@
     "pagination": {
         "condition": "{{body.data.hasMore == true && body.data.nextCursor != null}}",
         "body": {
-            "method": "requests.list",
             "params": {
-                "formId": "{{parameters.formId}}",
-                "status": "{{parameters.status}}",
-                "externalId": "{{parameters.externalId}}",
-                "includeTest": "{{parameters.includeTest}}",
-                "limit": "{{min(100, parameters.limit)}}",
                 "cursor": "{{body.data.nextCursor}}"
             }
         }

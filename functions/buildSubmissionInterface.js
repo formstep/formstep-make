@@ -15,7 +15,8 @@
 function buildSubmissionInterface(items) {
     // Formstep question type -> Make interface type for a single-valued
     // answer. Anything unlisted stays `any`: the stored value keeps its own
-    // JSON shape in data.answers.
+    // JSON shape in data.answers. A date answer is `YYYY-MM-DD` with no time,
+    // which Make wants typed as text, like a time answer.
     var TYPE_BY_INPUT_TYPE = {
         text: 'text',
         textarea: 'text',
@@ -26,7 +27,7 @@ function buildSubmissionInterface(items) {
         rating: 'number',
         scale: 'number',
         switch: 'boolean',
-        date: 'date',
+        date: 'text',
         time: 'text',
         radio: 'text',
         select: 'text',

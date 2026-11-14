@@ -1,0 +1,5 @@
+{
+    "name": "listRequests",
+    "label": "List requests",
+    "connection": "formbase"
+}

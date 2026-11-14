@@ -41,7 +41,7 @@ function sectionFiles(local, name) {
 test('every repository file maps to its Hub section', () => {
     const local = collectLocalApp(ROOT, { mode: 'dynamic' })
 
-    assert.deepEqual(sectionFiles(local, 'formbase-f1d7bp'), { base: 'app/base.imljson', readme: 'app/readme.md' })
+    assert.deepEqual(sectionFiles(local, 'formbase-f1d7bp'), { base: 'app/base.imljson', groups: 'app/groups.imljson', readme: 'app/readme.md' })
     assert.deepEqual(sectionFiles(local, 'formbase'), {
         api: 'connections/formbase/communication.imljson',
         parameters: 'connections/formbase/parameters.imljson',
@@ -92,12 +92,12 @@ test('static mode pushes the static twins and skips functions and the RPCs that 
 
     assert.equal(local.components.some((component) => component.kind === 'function'), false)
     const rpcs = local.components.filter((component) => component.kind === 'rpc').map((component) => component.name)
-    assert.deepEqual(rpcs.sort(), ['getSampleRequest', 'getSampleSubmission', 'listForms'])
+    assert.deepEqual(rpcs.sort(), ['getSampleRequest', 'getSampleSubmission', 'listForms', 'listRequests'])
     assert.deepEqual(
         local.skipped.filter((item) => item.kind === 'rpc').map((item) => item.name).sort(),
         FUNCTION_BACKED_RPCS
     )
-    assert.equal(local.skipped.filter((item) => item.kind === 'function').length, 5)
+    assert.equal(local.skipped.filter((item) => item.kind === 'function').length, 7)
 
     // README section 2: exactly these sections take the static twin.
     const twins = local.components.flatMap((component) => component.sections.filter((section) => section.staticTwin).map((section) => section.file))
@@ -110,7 +110,9 @@ test('static mode pushes the static twins and skips functions and the RPCs that 
         'modules/remind_request/api.static.imljson',
         'modules/search_requests/api.static.imljson',
         'modules/watch_public_link_submissions/interface.static.imljson',
-        'modules/watch_requests/interface.static.imljson'
+        'modules/watch_requests/interface.static.imljson',
+        'webhooks/request_webhook/api.static.imljson',
+        'webhooks/submission_webhook/api.static.imljson'
     ])
 
     // Nothing pushed in either mode points at an RPC or function that mode leaves out.
@@ -122,7 +124,7 @@ test('dynamic mode pushes functions, every RPC and no static twin', () => {
     const local = collectLocalApp(ROOT, { mode: 'dynamic' })
 
     assert.deepEqual(local.skipped, [])
-    assert.equal(local.components.filter((component) => component.kind === 'function').length, 5)
+    assert.equal(local.components.filter((component) => component.kind === 'function').length, 7)
     for (const name of FUNCTION_BACKED_RPCS) assert.ok(local.components.some((component) => component.name === name), name)
     assert.equal(local.components.some((component) => component.sections.some((section) => section.staticTwin)), false)
 })
@@ -303,12 +305,14 @@ function stubHub() {
 
     // Same content, other formatting: in sync. The readme and the connection's Communication are stale.
     answer(sectionPath('app', 'formbase-f1d7bp', 'base'), JSON.stringify(JSON.parse(read('app/base.imljson'))))
+    answer(sectionPath('app', 'formbase-f1d7bp', 'groups'), read('app/groups.imljson'))
     answer(sectionPath('app', 'formbase-f1d7bp', 'readme'), '# formbase\n\nOld readme.\n')
     answer(sectionPath('connection', 'formbase-f1d7bp', 'api'), '{}')
     answer(sectionPath('connection', 'formbase-f1d7bp', 'parameters'), read('connections/formbase/parameters.imljson'))
     answer(sectionPath('connection', 'formbase-f1d7bp', 'scope'), read('connections/formbase/scope.imljson'))
-    for (const section of ['parameters', 'attach', 'detach', 'api']) {
-        answer(sectionPath('webhook', 'formbase-f1d7bp', section), `// pasted by hand\n${read(`webhooks/submission_webhook/${section}.imljson`)}`)
+    // The stub Hub is read in static mode, where the webhook's Communication is its static twin.
+    for (const file of ['parameters', 'attach', 'detach', 'api.static']) {
+        answer(sectionPath('webhook', 'formbase-f1d7bp', file.replace('.static', '')), `// pasted by hand\n${read(`webhooks/submission_webhook/${file}.imljson`)}`)
     }
     answer(sectionPath('rpc', 'listForms', 'api'), read('rpcs/list_forms/api.imljson'))
     answer(sectionPath('rpc', 'getSampleSubmission', 'api'), read('rpcs/get_sample_submission/api.imljson'))
@@ -349,7 +353,7 @@ test('the plan creates what the Hub lacks, pushes what differs and reports Hub-o
 
     assert.deepEqual(
         plan.entries.filter((item) => item.create).map((item) => item.component.name),
-        ['getSampleRequest', 'request_webhook', 'watchPublicLinkSubmissions', 'watchRequests', 'cancelRequest', 'createRequest', 'getRequest', 'remindRequest', 'searchRequests']
+        ['getSampleRequest', 'listRequests', 'request_webhook', 'watchPublicLinkSubmissions', 'watchRequests', 'cancelRequest', 'createRequest', 'getRequest', 'remindRequest', 'searchRequests']
     )
     assert.deepEqual(pushed('formbase-f1d7bp'), ['readme'])
     assert.deepEqual(pushed('formbase'), ['api'])
@@ -361,8 +365,8 @@ test('the plan creates what the Hub lacks, pushes what differs and reports Hub-o
     // Matched by label in any case, then renamed to the sentence-case label.
     assert.deepEqual(entry('submission_webhook').patch, { label: label('webhooks/submission_webhook/metadata.imljson') })
     assert.equal(entry('makeApiCall').patch, null)
-    // app base, connection parameters and scope, four webhook sections, two RPCs, five makeApiCall sections
-    assert.equal(plan.inSync, 1 + 2 + 4 + 2 + 5)
+    // app base and groups, connection parameters and scope, four webhook sections, two RPCs, five makeApiCall sections
+    assert.equal(plan.inSync, 2 + 2 + 4 + 2 + 5)
 
     assert.deepEqual(plan.hubOnly, [{ kind: 'module', name: 'watchSubmissions', label: 'Watch Submissions' }])
     // Without the secret, Common data is neither read nor pushed.

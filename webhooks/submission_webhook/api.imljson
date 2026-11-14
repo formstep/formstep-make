@@ -4,5 +4,5 @@
         "status": 200,
         "body": {}
     },
-    "output": "{{body}}"
+    "output": "{{eventDates(body)}}"
 }

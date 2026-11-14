@@ -19,10 +19,7 @@
     "pagination": {
         "condition": "{{body.data.hasMore == true && body.data.nextCursor != null}}",
         "body": {
-            "method": "forms.list",
             "params": {
-                "workspaceId": "{{connection.workspaceId}}",
-                "limit": 100,
                 "cursor": "{{body.data.nextCursor}}"
             }
         }

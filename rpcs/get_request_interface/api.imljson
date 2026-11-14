@@ -1,6 +1,10 @@
 {
     "url": "/api/v1",
     "method": "POST",
+    "condition": {
+        "condition": "{{ifempty(parameters.formId, '') != ''}}",
+        "default": "{{buildRequestInterface(emptyarray)}}"
+    },
     "body": {
         "method": "fields.list",
         "params": {
