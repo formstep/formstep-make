@@ -30,13 +30,13 @@
     "deliveryStatus": "sent",
     "hasCallback": false,
     "callbackFailedAt": null,
-    "expiresAt": 1794787200000,
-    "createdAt": 1792195200000,
-    "updatedAt": 1792195900000,
-    "openedAt": 1792195500000,
-    "startedAt": 1792195600000,
-    "lastActivityAt": 1792195900000,
-    "completedAt": 1792195900000,
+    "expiresAt": "2026-11-16T00:00:00.000Z",
+    "createdAt": "2026-10-17T00:00:00.000Z",
+    "updatedAt": "2026-10-17T00:11:40.000Z",
+    "openedAt": "2026-10-17T00:05:00.000Z",
+    "startedAt": "2026-10-17T00:06:40.000Z",
+    "lastActivityAt": "2026-10-17T00:11:40.000Z",
+    "completedAt": "2026-10-17T00:11:40.000Z",
     "expiredAt": null,
     "canceledAt": null,
     "canceledBy": null,
@@ -56,8 +56,8 @@
         "attendees": "Grace Hopper, Alan Turing"
     },
     "timeline": [
-        { "id": "req_2pmJk8Lq3RxYn4Wt5VbCdE:created", "at": 1792195200000, "type": "created" },
-        { "id": "req_2pmJk8Lq3RxYn4Wt5VbCdE:opened", "at": 1792195500000, "type": "opened" },
-        { "id": "req_2pmJk8Lq3RxYn4Wt5VbCdE:completed", "at": 1792195900000, "type": "completed" }
+        { "id": "req_2pmJk8Lq3RxYn4Wt5VbCdE:created", "at": "2026-10-17T00:00:00.000Z", "type": "created" },
+        { "id": "req_2pmJk8Lq3RxYn4Wt5VbCdE:opened", "at": "2026-10-17T00:05:00.000Z", "type": "opened" },
+        { "id": "req_2pmJk8Lq3RxYn4Wt5VbCdE:completed", "at": "2026-10-17T00:11:40.000Z", "type": "completed" }
     ]
 }
