@@ -10,7 +10,9 @@ The app follows the Formstep [n8n](https://github.com/formstep/n8n-nodes-formste
 
 ### Connection
 
-OAuth 2.0 authorization code with mandatory PKCE S256 and the scopes `api:read api:write offline_access`. Access and refresh tokens rotate. One connection covers one workspace, and the form picker lists that workspace's forms with cursor pagination. The connection has no parameters: the user signs in and picks the workspace on Formstep's consent page. See [OAuth redirect](#oauth-redirect).
+OAuth 2.0 authorization code with mandatory PKCE S256 and the scopes `api:read api:write offline_access`. Access and refresh tokens rotate. One connection covers one workspace, and the form picker lists that workspace's forms with cursor pagination. The user signs in and picks the workspace on Formstep's consent page. See [OAuth redirect](#oauth-redirect).
+
+The connection's two advanced parameters, Client ID and Client secret (a password), let a user bring an OAuth client of their own, registered through Formstep's dynamic client registration (`POST https://api.formstep.io/oauth/register`). Left empty, the connection uses `fboc_make` from Common data: authorize, token and refresh read `{{ifempty(parameters.clientId, common.clientId)}}` and the same for the secret, as Make's review asks. Make sends the secret in the token request body, so an own client must register with the auth method `client_secret_post`, or `none` for a public client; `client_secret_basic` fails with "Basic auth required". It must also register Make's callback as a redirect URI.
 
 ### Triggers
 
@@ -83,7 +85,7 @@ A Make custom-app webhook sees only the parsed `body`, `headers` and `query`, ne
 
 ### OAuth redirect
 
-Both `redirect_uri` values are `{{oauth.localRedirectUri}}`, which Make's review requires. It resolves to `https://www.make.com/oauth/cb/app` until Make approves the app and to `https://www.make.com/oauth/cb/formbase-f1d7bp` after. Formstep allows both on `fboc_make`, plus the four zone callbacks (`https://{eu1,eu2,us1,us2}.make.com/oauth/cb/app`) that connections used before.
+Both `redirect_uri` values are `{{oauth.localRedirectUri}}`, which Make's review requires. It resolves to `https://www.make.com/oauth/cb/app` until Make approves the app, and that address stays valid for the dev version after release. At release the app loses its `-f1d7bp` suffix and the connection is renamed with it, so the production callback is `https://www.make.com/oauth/cb/<released connection name>`; Make's support named it `https://www.make.com/oauth/cb/formbase` (November 2026), and Make confirms it at release. `fboc_make` allows it since 18 November 2026; if Make confirms a different address at release, add it with [step 1](#1-deploy-formstep-oauth-support) and keep `/oauth/cb/app`. `fboc_make` also allows `https://www.make.com/oauth/cb/formbase-f1d7bp`, which an earlier review email named by mistake, and the four zone callbacks (`https://{eu1,eu2,us1,us2}.make.com/oauth/cb/app`) that connections used before.
 
 Until version 3 the connection had a Make zone parameter and built the callback from it, because `www.make.com/oauth/cb/app` answered "Resource not found" for this unapproved app in November 2026. If a new connection fails that way again before approval, report it to Make; do not bring the parameter back.
 
@@ -93,7 +95,7 @@ The Base turns every error into `[<status>/<code>] <message>` from the API's err
 
 ### Pagination
 
-`pagination.body` carries only `params.cursor`. Make's review says the pagination body is merged into the original request; Make's documentation says it replaces the body. If it replaced it, page two would lose `method`. Check this live with more than 100 forms or requests before relying on it (smoke test step 10).
+`pagination.body` carries only `params.cursor`. With `mergeWithParent` at its default, Make merges it into the original request body, so later pages keep `method` and the other params and only `params.cursor` changes. Make's pagination page reads as if the body were replaced; Make's review confirmed the merge, and a live run on 18 November 2026 showed it: with the body `limit` set to 2 for the run, Search requests with Limit 5 and Status `canceled` returned 5 distinct canceled requests over three pages, without an error (scenario `8666757`).
 
 ### Get a request keeps its form picker among the mappable parameters
 
@@ -146,7 +148,7 @@ Seed the production client:
 
 ```bash
 pnpm convex run --prod internal/oauthClients:seedMakeOAuthClient \
-  '{"redirectUris":["https://www.make.com/oauth/cb/app","https://www.make.com/oauth/cb/formbase-f1d7bp","https://eu1.make.com/oauth/cb/app","https://eu2.make.com/oauth/cb/app","https://us1.make.com/oauth/cb/app","https://us2.make.com/oauth/cb/app"]}'
+  '{"redirectUris":["https://www.make.com/oauth/cb/app","https://www.make.com/oauth/cb/formbase","https://www.make.com/oauth/cb/formbase-f1d7bp","https://eu1.make.com/oauth/cb/app","https://eu2.make.com/oauth/cb/app","https://us1.make.com/oauth/cb/app","https://us2.make.com/oauth/cb/app"]}'
 ```
 
 Expected result:
@@ -238,7 +240,7 @@ Create a test scenario in Make:
 7. Delete the trigger's webhook in Make. Use **Make an API call** with `webhooks.list` and the `formId` to confirm the subscription is gone. Deleting the scenario alone leaves the webhook and its subscription.
 8. Create a webhook on `Submission abandoned`, select an idle window, save a partial response and leave it unchanged past that window. Confirm the bundle has the type `submission.abandoned`. The backend sweeps hourly, so delivery can come up to about one hour after the threshold.
 9. Run an error scenario with an unknown API method and confirm a readable `METHOD_NOT_FOUND` error.
-10. Test the form picker against a workspace with more than 100 forms, or Search requests with a limit above 100 on a form with more than 100 requests, and confirm the second page loads (see [Pagination](#pagination)). Keep the execution logs for the review.
+10. Check pagination without 100 records: set the `limit` in `modules/search_requests/api.imljson` to `{{min(2, parameters.limit)}}`, push, run Search requests with Limit 5 and a Status filter on a form with at least 5 requests in that status, and confirm 5 bundles, all with that status. Then restore `min(100, ...)`, push, and confirm a dry run reports nothing to push (see [Pagination](#pagination)).
 11. Add **Create a request** with the same form. Picking the form lists one input per prefillable field under **Prefill**, one per hidden field under **Context**, and the **Read-only fields** picker. On an app pushed with `--static`, `prefill` and `context` are JSON inputs. Set an external ID, run once, and confirm the bundle carries `id`, `url` and `deduplicated: false`, and that `createdAt` and `expiresAt` show as dates. If they show as text, replace `new Date(...)` in the three date functions with `iml.parseDate(...)`. Run again with the same inputs and confirm `deduplicated: true` and the same `url`.
 12. Add **Watch requests** on the same form with `Request completed`, run once, and complete the request from step 11 through its `url`. Confirm one bundle with `type: request.completed`, `data.request.status: completed`, `data.answers` and `data.display`. Confirm the Watch public link submissions scenario from step 1 did not run: a completed request fires Watch requests alone.
 13. Create a second request, add **Cancel a request** with its `id` and a reason, and confirm the summary comes back `canceled` with `cancelReason`. With Watch requests on `Request canceled`, confirm one `request.canceled` bundle with only `data.request`.

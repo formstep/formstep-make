@@ -160,12 +160,27 @@ test('OAuth connection implements PKCE, confidential client auth, rotation, and 
     assert.deepEqual(scope, ['api:read', 'api:write', 'offline_access'])
 
     assert.equal(communication.authorize.url, 'https://api.formstep.io/oauth/authorize')
-    // Make supplies the callback: /oauth/cb/app until the app is approved, /oauth/cb/formbase-f1d7bp after.
-    // A hardcoded address would break new connections at release, so the connection asks for nothing.
+    // Make supplies the callback: /oauth/cb/app until the app is approved, the released connection's own address after.
+    // A hardcoded address would break new connections at release.
     assert.equal(communication.authorize.qs.redirect_uri, '{{oauth.localRedirectUri}}')
     assert.equal(communication.token.body.redirect_uri, '{{oauth.localRedirectUri}}')
-    assert.deepEqual(readJson('connections/formbase/parameters.imljson'), [])
-    assert.equal(JSON.stringify(communication).includes('parameters.'), false)
+
+    // A user may bring an OAuth client of their own (Formstep supports dynamic client registration).
+    // Formstep's Make client in common data stays the default, as Make's review asks.
+    const parameters = readJson('connections/formbase/parameters.imljson')
+    assert.deepEqual(parameters.map(({ name, type, advanced }) => ({ name, type, advanced })), [
+        { name: 'clientId', type: 'text', advanced: true },
+        { name: 'clientSecret', type: 'password', advanced: true }
+    ])
+    const clientId = '{{ifempty(parameters.clientId, common.clientId)}}'
+    const clientSecret = '{{ifempty(parameters.clientSecret, common.clientSecret)}}'
+    assert.equal(communication.authorize.qs.client_id, clientId)
+    for (const step of ['token', 'refresh']) {
+        assert.equal(communication[step].body.client_id, clientId, `${step} falls back to Formstep's client ID`)
+        assert.equal(communication[step].body.client_secret, clientSecret, `${step} falls back to Formstep's client secret`)
+    }
+    const otherParameters = JSON.stringify(communication).match(/parameters\.\w+/g).filter((ref) => !['parameters.clientId', 'parameters.clientSecret'].includes(ref))
+    assert.deepEqual(otherParameters, [])
     for (const step of ['token', 'refresh', 'info']) {
         assert.match(communication[step].response.error.message, /^\[\{\{statusCode\}\}\//, `${step} error names the status code`)
         assert.match(communication[step].response.error.message, /ifempty\(/, `${step} error has a fallback`)
@@ -179,7 +194,6 @@ test('OAuth connection implements PKCE, confidential client auth, rotation, and 
     assert.equal(communication.token.type, 'urlencoded')
     assert.equal(communication.token.body.grant_type, 'authorization_code')
     assert.equal(communication.token.body.code_verifier, '{{temp.codeVerifier}}')
-    assert.equal(communication.token.body.client_secret, '{{common.clientSecret}}')
     assert.equal(communication.token.response.data.refreshToken, '{{body.refresh_token}}')
 
     assert.equal(communication.refresh.body.grant_type, 'refresh_token')

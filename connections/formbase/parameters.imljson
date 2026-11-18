@@ -1,1 +1,16 @@
-[]
+[
+    {
+        "name": "clientId",
+        "type": "text",
+        "label": "Client ID",
+        "advanced": true,
+        "help": "Leave empty to connect with Formstep's own Make client. To use an OAuth client of your own, register it at https://api.formstep.io/oauth/register with the redirect URI https://www.make.com/oauth/cb/app, the scope `api:read api:write offline_access` and the token endpoint auth method `client_secret_post` (or `none` for a public client), then enter its client ID here."
+    },
+    {
+        "name": "clientSecret",
+        "type": "password",
+        "label": "Client secret",
+        "advanced": true,
+        "help": "The secret of your own OAuth client. Leave empty to use Formstep's own Make client, or for a public client registered with the token endpoint auth method `none`."
+    }
+]
