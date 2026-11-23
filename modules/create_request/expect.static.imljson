@@ -87,7 +87,7 @@
         "label": "Reminders",
         "required": false,
         "advanced": true,
-        "help": "Idle offsets before a reminder email, for example `2d` and `5d`, up to five. Empty inherits the form's reminder schedule.",
+        "help": "Idle offsets before a reminder email, for example `2d` and `5d`, up to five. Empty uses the form's reminder schedule when Formstep emails the invitation, and sends no reminders otherwise.",
         "spec": {
             "type": "text",
             "label": "Offset"
