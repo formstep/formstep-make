@@ -85,9 +85,9 @@ A Make custom-app webhook sees only the parsed `body`, `headers` and `query`, ne
 
 ### OAuth redirect
 
-Both `redirect_uri` values are `{{oauth.localRedirectUri}}`, which Make's review requires. It resolves to `https://www.make.com/oauth/cb/app` until Make approves the app, and that address stays valid for the dev version after release. At release the app loses its `-f1d7bp` suffix and the connection is renamed with it, so the production callback is `https://www.make.com/oauth/cb/<released connection name>`; Make's support named it `https://www.make.com/oauth/cb/formbase` (November 2026), and Make confirms it at release. `fboc_make` allows it since 18 November 2026; if Make confirms a different address at release, add it with [step 1](#1-deploy-formstep-oauth-support) and keep `/oauth/cb/app`. `fboc_make` also allows `https://www.make.com/oauth/cb/formbase-f1d7bp`, which an earlier review email named by mistake, and the four zone callbacks (`https://{eu1,eu2,us1,us2}.make.com/oauth/cb/app`) that connections used before.
+Both `redirect_uri` values are `{{oauth.localRedirectUri}}`, which Make's review requires. It resolves to `https://www.make.com/oauth/cb/app` until Make approves the app, and that address stays valid for the dev version after release. At release Make gives the app the internal name `formstep`, so the production callback is `https://www.make.com/oauth/cb/formstep` (Make's review, 25 November 2026); it becomes active only after the release. `fboc_make` allows it since 25 November 2026. `fboc_make` also allows `https://www.make.com/oauth/cb/formbase` and `https://www.make.com/oauth/cb/formbase-f1d7bp`, which earlier review emails named, and the four zone callbacks (`https://{eu1,eu2,us1,us2}.make.com/oauth/cb/app`) that connections used before.
 
-Until version 3 the connection had a Make zone parameter and built the callback from it, because `www.make.com/oauth/cb/app` answered "Resource not found" for this unapproved app in November 2026. If a new connection fails that way again before approval, report it to Make; do not bring the parameter back.
+Until version 3 the connection had a Make zone parameter and built the callback from it, because `www.make.com/oauth/cb/app` answered "Resource not found" in November 2026. The cause was Formstep's: the consent page answered with a 302, and its `form-action` policy blocked Make's onward redirect to the account's zone. Since 25 November 2026 the consent page sends the browser on with a refresh page instead. Do not bring the zone parameter back.
 
 ### Errors
 
@@ -148,7 +148,7 @@ Seed the production client:
 
 ```bash
 pnpm convex run --prod internal/oauthClients:seedMakeOAuthClient \
-  '{"redirectUris":["https://www.make.com/oauth/cb/app","https://www.make.com/oauth/cb/formbase","https://www.make.com/oauth/cb/formbase-f1d7bp","https://eu1.make.com/oauth/cb/app","https://eu2.make.com/oauth/cb/app","https://us1.make.com/oauth/cb/app","https://us2.make.com/oauth/cb/app"]}'
+  '{"redirectUris":["https://www.make.com/oauth/cb/app","https://www.make.com/oauth/cb/formstep","https://www.make.com/oauth/cb/formbase","https://www.make.com/oauth/cb/formbase-f1d7bp","https://eu1.make.com/oauth/cb/app","https://eu2.make.com/oauth/cb/app","https://us1.make.com/oauth/cb/app","https://us2.make.com/oauth/cb/app"]}'
 ```
 
 Expected result:
@@ -232,7 +232,7 @@ Once functions are enabled, add the seven functions, create the RPCs, and switch
 Create a test scenario in Make:
 
 1. Add **Formstep → Watch public link submissions**.
-2. Create a connection. Sign in, select a workspace and approve the consent. Make returns to `www.make.com/oauth/cb/app`; a "Resource not found" page there is Make's to fix (see [OAuth redirect](#oauth-redirect)). The connection label shows the workspace name.
+2. Create a connection. Sign in, select a workspace and approve the consent. Make returns to `www.make.com/oauth/cb/app` (see [OAuth redirect](#oauth-redirect)). The connection label shows the workspace name.
 3. Select a form and `Submission created`. Use **Make an API call** with `webhooks.list` to confirm the registered subscription, under `body.data.items`, carries no `idleWindow`. The attach body sends it only for abandoned submissions.
 4. Open the module's output mapping panel and confirm every question of the form is listed under **Answers** and **Answers (display)** by its field key. The list comes from `getSubmissionInterface`. A form that is not published has no field list yet (`fields.list` answers `published: false`), so the module shows the envelope alone until the form is published.
 5. Click **Run once**, then submit the form.
